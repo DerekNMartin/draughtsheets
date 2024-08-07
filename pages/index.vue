@@ -57,7 +57,6 @@ const allPlayerData = computed<Player[]>(() => {
         bye_week: playerData.player_bye_week,
         tier: playerData.tier,
         fpts: Number(matchingPlayerProjection?.fpts),
-        vorp: 0,
         rank: {
           roundPick: calculateRoundPick(playerData.rank_ecr).join('|'),
           ecr: playerData.rank_ecr,
@@ -92,16 +91,44 @@ const teTableData = computed(() => {
     return player.position?.toLowerCase() === 'te';
   });
 });
+
+/**
+ * Collect the min and max value of players across each position table, to determine the overall
+ * min and max value across all players. Used for colour interpolation.
+ */
+const combinedMinMax = reactive({ min: 0, max: 0 });
+function handleMinMax(minMax: { min: number; max: number }) {
+  const { min, max } = minMax;
+  if (min < combinedMinMax.min) combinedMinMax.min = min;
+  if (max > combinedMinMax.max) combinedMinMax.max = max;
+}
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-6">
-    <PlayersTable :data="qbTableData" header="Quarterback" :replacement="15" />
-    <PlayersTable :data="rbTableData" header="Running back" :replacement="36" />
+  <div class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
+    <PlayersTable
+      :data="qbTableData"
+      header="Quarterback"
+      :replacement="15"
+      :min-max="combinedMinMax"
+      @min-max="handleMinMax" />
+    <PlayersTable
+      :data="rbTableData"
+      header="Running back"
+      :replacement="36"
+      :min-max="combinedMinMax"
+      @min-max="handleMinMax" />
     <PlayersTable
       :data="wrTableData"
       header="Wide Receiver"
-      :replacement="46" />
-    <PlayersTable :data="teTableData" header="Tightend" :replacement="17" />
+      :replacement="46"
+      :min-max="combinedMinMax"
+      @min-max="handleMinMax" />
+    <PlayersTable
+      :data="teTableData"
+      header="Tightend"
+      :replacement="17"
+      :min-max="combinedMinMax"
+      @min-max="handleMinMax" />
   </div>
 </template>
