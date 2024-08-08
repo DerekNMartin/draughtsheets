@@ -13,42 +13,61 @@ const { data: rbProjectionData } = await useFetch('/api/projections', {
 const { data: teProjectionData } = await useFetch('/api/projections', {
   query: { position: 'te' },
 });
-const { data: dstProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'dst' },
-});
 const { data: kProjectionData } = await useFetch('/api/projections', {
   query: { position: 'k' },
 });
 
+const scoringSelectOptions = [
+  { id: 'STD', label: 'Standard' },
+  { id: 'PPR', label: 'PPR' },
+  { id: 'HALF', label: 'Half PPR' },
+];
+const scoringSelected = ref(scoringSelectOptions[0]);
+const rankingQuery = computed(() => {
+  return {
+    position: 'all',
+    scoring: scoringSelected.value.id,
+  };
+});
 const { data: rankingData } = await useFetch('/api/rankings', {
-  query: { position: 'all' },
+  query: rankingQuery,
 });
 
-function calculateRoundPick(ecr: number, numTeams = 12) {
-  const round = Math.ceil(ecr / numTeams);
-  const pick = ecr % numTeams || numTeams;
+const leagueSelectOptions = [
+  { id: 8, label: '8 Team' },
+  { id: 10, label: '10 Team' },
+  { id: 12, label: '12 Team' },
+  { id: 14, label: '14 Team' },
+];
+const leagueSelected = ref(leagueSelectOptions[0]);
+function calculateRoundPick(ecr: number) {
+  const round = Math.ceil(ecr / leagueSelected.value.id);
+  const pick = ecr % leagueSelected.value.id || leagueSelected.value.id;
   return [round, pick];
 }
 
 const allPlayerData = computed<Player[]>(() => {
   if (!rankingData.value?.players) return [];
-  const tableData: Player[] = rankingData.value?.players
+  const tableData = rankingData.value?.players
     .filter(({ player_team_id }) => player_team_id !== 'FA')
-    .map((playerData) => {
+    .reduce<Player[]>((data, playerData) => {
       const combinedPositionProjectionData = qbProjectionData.value?.concat(
         wrProjectionData.value || [],
         rbProjectionData.value || [],
         teProjectionData.value || [],
-        dstProjectionData.value || [],
         kProjectionData.value || []
       );
       const matchingPlayerProjection = combinedPositionProjectionData?.find(
         ({ player_id }) => player_id === playerData.player_id.toString()
       );
-      const { player_id, player, fpts, ...stats } =
-        matchingPlayerProjection || {};
+      const {
+        player_id,
+        player: name,
+        fpts,
+        ...stats
+      } = matchingPlayerProjection || {};
 
-      return {
+      const player: Player = {
         player_name: playerData.player_name,
         team: playerData.player_team_id,
         position: playerData.player_position_id as Position,
@@ -66,7 +85,9 @@ const allPlayerData = computed<Player[]>(() => {
         },
         stats,
       };
-    });
+      if (matchingPlayerProjection) data.push(player);
+      return data;
+    }, []);
 
   return tableData;
 });
@@ -110,14 +131,6 @@ const filter = computed(() => {
     team: teamSelected.value,
   };
 });
-
-const scoringSelectOptions = [
-  { id: 'std', label: 'Standard' },
-  { id: 'ppr', label: 'PPR' },
-  { id: 'half', label: 'Half PPR' },
-];
-const scoringSelected = ref(scoringSelectOptions[0]);
-
 const teamSelectOptions = computed(() => {
   const teams = allPlayerData.value
     .reduce<string[]>((teams, player) => {
@@ -140,7 +153,9 @@ const teamSelected = ref(teamSelectOptions.value[0]);
       </div>
     </section>
     <UCard
-      :ui="{ body: { base: 'grid grid-cols-[3fr,1fr,1fr] gap-4 items-end' } }">
+      :ui="{
+        body: { base: 'grid grid-cols-[3fr,1fr,1fr,1fr] gap-4 items-end' },
+      }">
       <div>
         <label class="text-xs font-semibold text-slate-600">Search</label>
         <UInput
@@ -163,6 +178,27 @@ const teamSelected = ref(teamSelectOptions.value[0]);
               'ring-2 ring-primary-500 dark:ring-primary-400': open,
             }">
             {{ teamSelected }}
+            <UIcon
+              name="i-heroicons-chevron-down-20-solid"
+              class="w-5 h-5 transition-transform"
+              :class="{ 'transform rotate-180': open }" />
+          </UButton>
+        </USelectMenu>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-600">League</label>
+        <USelectMenu
+          v-slot="{ open }"
+          v-model="leagueSelected"
+          class="h-full"
+          :options="leagueSelectOptions">
+          <UButton
+            color="white"
+            class="flex-1 justify-between h-10"
+            :class="{
+              'ring-2 ring-primary-500 dark:ring-primary-400': open,
+            }">
+            {{ leagueSelected.label }}
             <UIcon
               name="i-heroicons-chevron-down-20-solid"
               class="w-5 h-5 transition-transform"
