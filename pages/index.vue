@@ -39,7 +39,7 @@ const leagueSelectOptions = [
   { id: 12, label: '12 Team' },
   { id: 14, label: '14 Team' },
 ];
-const leagueSelected = ref(leagueSelectOptions[0]);
+const leagueSelected = ref(leagueSelectOptions[2]);
 function calculateRoundPick(ecr: number) {
   const round = Math.ceil(ecr / leagueSelected.value.id);
   const pick = ecr % leagueSelected.value.id || leagueSelected.value.id;
@@ -231,32 +231,28 @@ const teamSelected = ref(teamSelectOptions.value[0]);
     <section class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
       <PlayersTable
         :data="qbTableData"
-        header="Quarterback"
-        :replacement="15"
+        position="QB"
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
         @min-max="handleMinMax" />
       <PlayersTable
         :data="rbTableData"
-        header="Running Back"
-        :replacement="36"
+        position="RB"
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
         @min-max="handleMinMax" />
       <PlayersTable
         :data="wrTableData"
-        header="Wide Receiver"
-        :replacement="46"
+        position="WR"
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
         @min-max="handleMinMax" />
       <PlayersTable
         :data="teTableData"
-        header="Tight End"
-        :replacement="17"
+        position="TE"
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter

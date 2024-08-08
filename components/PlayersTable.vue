@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Player } from '@/types/player';
+import type { Player, Position } from '@/types/player';
 
 interface TablePlayer extends Omit<Player, 'scarcity'> {
   scarcity?: { value: number; colour: string };
@@ -11,10 +11,10 @@ const emit = defineEmits(['minMax']);
 const props = defineProps<{
   data: Player[];
   header?: string;
-  replacement: number;
   search?: string;
   filter?: { team: string };
   minMax: { min: number; max: number };
+  position: Exclude<Position, 'DST'>;
 }>();
 
 const columns = [
@@ -48,8 +48,6 @@ const sort = ref({
   direction: 'desc',
 });
 
-const replacementPlayer = computed(() => props.data[props.replacement]);
-
 function interpolateRgbColor(
   minColour: string,
   maxColour: string,
@@ -76,6 +74,21 @@ function interpolateRgbColor(
   return `rgb(${colorArr.join(',')})`;
 }
 
+// TODO: Adjust based on leage team size
+const positionTableType = computed(() => {
+  const mapping: Record<
+    Exclude<Position, 'DST'>,
+    { title: string; replacement: number }
+  > = {
+    QB: { title: 'Quarterback', replacement: 15 },
+    RB: { title: 'Running Back', replacement: 36 },
+    WR: { title: 'Wide Receiver', replacement: 46 },
+    TE: { title: 'Tight End', replacement: 17 },
+  };
+  return mapping[props.position];
+});
+const replacementValue = ref(positionTableType.value.replacement);
+const replacementPlayer = computed(() => props.data[replacementValue.value]);
 function calcVorp(player: Player) {
   const vorp = Number(player.fpts) - Number(replacementPlayer.value?.fpts);
   return replacementPlayer.value ? Number(vorp.toFixed(1)) : 0;
@@ -152,7 +165,6 @@ const minMaxPlayerValue = computed(() => {
     max: Math.max(...allVorp),
   };
 });
-
 watch(
   minMaxPlayerValue,
   (newValue) => {
@@ -163,9 +175,24 @@ watch(
 </script>
 
 <template>
-  <UCard>
+  <UCard :ui="{ body: { padding: 'sm:p-0 p-0' } }">
     <template #header>
-      <h2>{{ header }}</h2>
+      <section class="flex justify-between items-center">
+        <h2>{{ positionTableType.title }}</h2>
+        <div class="flex items-center gap-1">
+          <label class="text-xs">Replacement</label>
+          <UInput
+            v-model="replacementValue"
+            size="xs"
+            type="number"
+            class="w-16" />
+          <UAvatar
+            :src="replacementPlayer.image"
+            :alt="replacementPlayer.player_name"
+            :title="replacementPlayer.player_name"
+            class="border-2 border-solid border-grey" />
+        </div>
+      </section>
     </template>
     <section>
       <UTable
@@ -176,9 +203,9 @@ watch(
           wrapper: 'h-[600px] overflow-auto',
           th: {
             base: 'sticky top-0 bg-white z-10',
-            padding: 'px-0 pb-4',
+            padding: 'px-2 p-4',
           },
-          td: { padding: 'px-0 py-1' },
+          td: { padding: 'px-2 py-1' },
         }">
         <template #player_name-data="{ row }">
           <div class="flex gap-4 items-center">
