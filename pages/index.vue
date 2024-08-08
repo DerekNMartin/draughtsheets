@@ -72,24 +72,24 @@ const allPlayerData = computed<Player[]>(() => {
 });
 
 const qbTableData = computed(() => {
-  return allPlayerData.value.filter((player) => {
-    return player.position?.toLowerCase() === 'qb';
-  });
+  return allPlayerData.value.filter(
+    (player) => player.position.toLowerCase() === 'qb'
+  );
 });
 const rbTableData = computed(() => {
-  return allPlayerData.value.filter((player) => {
-    return player.position?.toLowerCase() === 'rb';
-  });
+  return allPlayerData.value.filter(
+    (player) => player.position.toLowerCase() === 'rb'
+  );
 });
 const wrTableData = computed(() => {
-  return allPlayerData.value.filter((player) => {
-    return player.position?.toLowerCase() === 'wr';
-  });
+  return allPlayerData.value.filter(
+    (player) => player.position.toLowerCase() === 'wr'
+  );
 });
 const teTableData = computed(() => {
-  return allPlayerData.value.filter((player) => {
-    return player.position?.toLowerCase() === 'te';
-  });
+  return allPlayerData.value.filter(
+    (player) => player.position.toLowerCase() === 'te'
+  );
 });
 
 /**
@@ -102,33 +102,129 @@ function handleMinMax(minMax: { min: number; max: number }) {
   if (min < combinedMinMax.min) combinedMinMax.min = min;
   if (max > combinedMinMax.max) combinedMinMax.max = max;
 }
+
+const searchValue = ref();
+
+const filter = computed(() => {
+  return {
+    team: teamSelected.value,
+  };
+});
+
+const scoringSelectOptions = [
+  { id: 'std', label: 'Standard' },
+  { id: 'ppr', label: 'PPR' },
+  { id: 'half', label: 'Half PPR' },
+];
+const scoringSelected = ref(scoringSelectOptions[0]);
+
+const teamSelectOptions = computed(() => {
+  const teams = allPlayerData.value
+    .reduce<string[]>((teams, player) => {
+      if (!teams.includes(player.team)) teams.push(player.team);
+      return teams;
+    }, [])
+    .sort();
+  teams.unshift('All');
+  return teams;
+});
+const teamSelected = ref(teamSelectOptions.value[0]);
 </script>
 
 <template>
-  <div class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
-    <PlayersTable
-      :data="qbTableData"
-      header="Quarterback"
-      :replacement="15"
-      :min-max="combinedMinMax"
-      @min-max="handleMinMax" />
-    <PlayersTable
-      :data="rbTableData"
-      header="Running back"
-      :replacement="36"
-      :min-max="combinedMinMax"
-      @min-max="handleMinMax" />
-    <PlayersTable
-      :data="wrTableData"
-      header="Wide Receiver"
-      :replacement="46"
-      :min-max="combinedMinMax"
-      @min-max="handleMinMax" />
-    <PlayersTable
-      :data="teTableData"
-      header="Tightend"
-      :replacement="17"
-      :min-max="combinedMinMax"
-      @min-max="handleMinMax" />
-  </div>
+  <main class="flex gap-6 flex-col p-6">
+    <section>
+      <div class="flex items-center gap-1">
+        <UIcon name="i-ph-beer-stein-bold" class="h-6 w-6 scale-x-[-1]" />
+        <h1 class="text-xl font-bold">DraughtSheets</h1>
+      </div>
+    </section>
+    <UCard
+      :ui="{ body: { base: 'grid grid-cols-[3fr,1fr,1fr] gap-4 items-end' } }">
+      <div>
+        <label class="text-xs font-semibold text-slate-600">Search</label>
+        <UInput
+          v-model="searchValue"
+          placeholder="Search player..."
+          icon="i-heroicons-magnifying-glass-20-solid"
+          size="lg" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-600">Team</label>
+        <USelectMenu
+          v-slot="{ open }"
+          v-model="teamSelected"
+          class="h-full"
+          :options="teamSelectOptions">
+          <UButton
+            color="white"
+            class="flex-1 justify-between h-10"
+            :class="{
+              'ring-2 ring-primary-500 dark:ring-primary-400': open,
+            }">
+            {{ teamSelected }}
+            <UIcon
+              name="i-heroicons-chevron-down-20-solid"
+              class="w-5 h-5 transition-transform"
+              :class="{ 'transform rotate-180': open }" />
+          </UButton>
+        </USelectMenu>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-600">Scoring</label>
+        <USelectMenu
+          v-slot="{ open }"
+          v-model="scoringSelected"
+          class="h-full"
+          :options="scoringSelectOptions">
+          <UButton
+            color="white"
+            class="flex-1 justify-between h-10"
+            :class="{
+              'ring-2 ring-primary-500 dark:ring-primary-400': open,
+            }">
+            {{ scoringSelected.label }}
+            <UIcon
+              name="i-heroicons-chevron-down-20-solid"
+              class="w-5 h-5 transition-transform"
+              :class="{ 'transform rotate-180': open }" />
+          </UButton>
+        </USelectMenu>
+      </div>
+    </UCard>
+    <section class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
+      <PlayersTable
+        :data="qbTableData"
+        header="Quarterback"
+        :replacement="15"
+        :min-max="combinedMinMax"
+        :search="searchValue"
+        :filter
+        @min-max="handleMinMax" />
+      <PlayersTable
+        :data="rbTableData"
+        header="Running Back"
+        :replacement="36"
+        :min-max="combinedMinMax"
+        :search="searchValue"
+        :filter
+        @min-max="handleMinMax" />
+      <PlayersTable
+        :data="wrTableData"
+        header="Wide Receiver"
+        :replacement="46"
+        :min-max="combinedMinMax"
+        :search="searchValue"
+        :filter
+        @min-max="handleMinMax" />
+      <PlayersTable
+        :data="teTableData"
+        header="Tight End"
+        :replacement="17"
+        :min-max="combinedMinMax"
+        :search="searchValue"
+        :filter
+        @min-max="handleMinMax" />
+    </section>
+  </main>
 </template>

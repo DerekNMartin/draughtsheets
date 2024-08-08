@@ -12,6 +12,8 @@ const props = defineProps<{
   data: Player[];
   header?: string;
   replacement: number;
+  search?: string;
+  filter?: { team: string };
   minMax: { min: number; max: number };
 }>();
 
@@ -130,6 +132,19 @@ const tableData = computed(() => {
   return scarcityTableData;
 });
 
+const filteredData = computed(() => {
+  if (!props?.search && props.filter?.team === 'All') return tableData.value;
+  return tableData.value
+    .filter(({ player_name }) => {
+      return player_name
+        .toLowerCase()
+        .includes(props?.search?.toLowerCase() || '');
+    })
+    .filter(({ team }) => {
+      return props.filter?.team === 'All' ? true : team === props.filter?.team;
+    });
+});
+
 const minMaxPlayerValue = computed(() => {
   const allVorp = tableData.value.map(({ vorp }) => vorp || 0);
   return {
@@ -154,11 +169,11 @@ watch(
     </template>
     <section>
       <UTable
-        :rows="tableData"
+        :rows="filteredData"
         :columns="columns"
         :sort
         :ui="{
-          wrapper: 'max-h-[600px] overflow-auto',
+          wrapper: 'h-[600px] overflow-auto',
           th: {
             base: 'sticky top-0 bg-white z-10',
             padding: 'px-0 pb-4',
