@@ -142,14 +142,39 @@ const teamSelectOptions = computed(() => {
   return teams;
 });
 const teamSelected = ref(teamSelectOptions.value[0]);
+
+const colorMode = useColorMode();
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark';
+  },
+  set() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+  },
+});
 </script>
 
 <template>
   <main class="flex gap-6 flex-col p-6">
-    <section>
+    <section class="flex items-center justify-between">
       <div class="flex items-center gap-1">
         <UIcon name="i-ph-beer-stein-bold" class="h-6 w-6 scale-x-[-1]" />
         <h1 class="text-xl font-bold">DraughtSheets</h1>
+      </div>
+      <div>
+        <ClientOnly>
+          <UButton
+            :icon="
+              isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'
+            "
+            color="gray"
+            variant="ghost"
+            aria-label="Theme"
+            @click="isDark = !isDark" />
+          <template #fallback>
+            <div class="w-8 h-8" />
+          </template>
+        </ClientOnly>
       </div>
     </section>
     <UCard
@@ -157,76 +182,30 @@ const teamSelected = ref(teamSelectOptions.value[0]);
         body: { base: 'grid grid-cols-[3fr,1fr,1fr,1fr] gap-4 items-end' },
       }">
       <div>
-        <label class="text-xs font-semibold text-slate-600">Search</label>
+        <label
+          class="text-xs font-semibold light:text-slate-600 dark:text-white">
+          Search
+        </label>
         <UInput
           v-model="searchValue"
           placeholder="Search player..."
           icon="i-heroicons-magnifying-glass-20-solid"
           size="lg" />
       </div>
-      <div>
-        <label class="text-xs font-semibold text-slate-600">Team</label>
-        <USelectMenu
-          v-slot="{ open }"
-          v-model="teamSelected"
-          class="h-full"
-          :options="teamSelectOptions">
-          <UButton
-            color="white"
-            class="flex-1 justify-between h-10"
-            :class="{
-              'ring-2 ring-primary-500 dark:ring-primary-400': open,
-            }">
-            {{ teamSelected }}
-            <UIcon
-              name="i-heroicons-chevron-down-20-solid"
-              class="w-5 h-5 transition-transform"
-              :class="{ 'transform rotate-180': open }" />
-          </UButton>
-        </USelectMenu>
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-slate-600">League</label>
-        <USelectMenu
-          v-slot="{ open }"
-          v-model="leagueSelected"
-          class="h-full"
-          :options="leagueSelectOptions">
-          <UButton
-            color="white"
-            class="flex-1 justify-between h-10"
-            :class="{
-              'ring-2 ring-primary-500 dark:ring-primary-400': open,
-            }">
-            {{ leagueSelected.label }}
-            <UIcon
-              name="i-heroicons-chevron-down-20-solid"
-              class="w-5 h-5 transition-transform"
-              :class="{ 'transform rotate-180': open }" />
-          </UButton>
-        </USelectMenu>
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-slate-600">Scoring</label>
-        <USelectMenu
-          v-slot="{ open }"
-          v-model="scoringSelected"
-          class="h-full"
-          :options="scoringSelectOptions">
-          <UButton
-            color="white"
-            class="flex-1 justify-between h-10"
-            :class="{
-              'ring-2 ring-primary-500 dark:ring-primary-400': open,
-            }">
-            {{ scoringSelected.label }}
-            <UIcon
-              name="i-heroicons-chevron-down-20-solid"
-              class="w-5 h-5 transition-transform"
-              :class="{ 'transform rotate-180': open }" />
-          </UButton>
-        </USelectMenu>
-      </div>
+      <AppSelect
+        v-model="teamSelected"
+        :options="teamSelectOptions"
+        label="Team" />
+      <AppSelect
+        v-model="leagueSelected"
+        :options="leagueSelectOptions"
+        label="League"
+        label-attribute="label" />
+      <AppSelect
+        v-model="scoringSelected"
+        :options="scoringSelectOptions"
+        label="Scoring"
+        label-attribute="label" />
     </UCard>
     <section class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
       <PlayersTable

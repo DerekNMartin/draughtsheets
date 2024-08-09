@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Player, Position } from '@/types/player';
+import { interpolateRgbColor } from '@/utils/color.js';
 
 interface TablePlayer extends Omit<Player, 'scarcity'> {
   scarcity?: { value: number; colour: string };
@@ -48,32 +49,6 @@ const sort = ref({
   direction: 'desc',
 });
 
-function interpolateRgbColor(
-  minColour: string,
-  maxColour: string,
-  minNum: number,
-  maxNum: number,
-  value: number
-) {
-  const shiftAmount = Math.abs(minNum);
-  const range = Math.abs(minNum + shiftAmount - (maxNum + shiftAmount));
-  const stepFactor = 1 / (range - 1);
-
-  const colour1 = minColour.match(/\d+/g)?.map(Number) || [];
-  const colour2 = maxColour.match(/\d+/g)?.map(Number) || [];
-
-  const colorArr = colour1?.map((rgb, index) =>
-    Math.round(
-      rgb +
-        stepFactor *
-          (value + shiftAmount - 1) *
-          (colour2[index] - colour1[index])
-    )
-  );
-
-  return `rgb(${colorArr.join(',')})`;
-}
-
 // TODO: Adjust based on leage team size
 const positionTableType = computed(() => {
   const mapping: Record<
@@ -113,8 +88,8 @@ function calcScarcity(data: Player[]) {
       tablePlayer.scarcity = {
         value: percentageRemaining,
         colour: interpolateRgbColor(
-          'rgb(34, 211, 238)',
-          'rgb(245, 158, 11)',
+          'rgb(199, 210, 254)',
+          'rgb(254, 215, 170)',
           0,
           100,
           percentageRemaining
@@ -133,7 +108,7 @@ const tableData = computed(() => {
       vorp,
       vorpColour: interpolateRgbColor(
         'rgb(220, 38, 38)',
-        'rgb(34, 197, 94)',
+        'rgb(5, 150, 105)',
         props.minMax.min,
         props.minMax.max,
         vorp
@@ -186,11 +161,12 @@ watch(
             size="xs"
             type="number"
             class="w-16" />
-          <UAvatar
-            :src="replacementPlayer.image"
-            :alt="replacementPlayer.player_name"
-            :title="replacementPlayer.player_name"
-            class="border-2 border-solid border-grey" />
+          <UTooltip :text="replacementPlayer.player_name">
+            <UAvatar
+              :src="replacementPlayer.image"
+              :alt="replacementPlayer.player_name"
+              class="border-2 border-solid border-gray-200 dark:border-gray-700" />
+          </UTooltip>
         </div>
       </section>
     </template>
@@ -202,8 +178,8 @@ watch(
         :ui="{
           wrapper: 'h-[600px] overflow-auto',
           th: {
-            base: 'sticky top-0 bg-white z-10',
-            padding: 'px-2 p-4',
+            base: 'sticky top-0 bg-white dark:bg-gray-900 z-10',
+            padding: 'px-2 py-4',
           },
           td: { padding: 'px-2 py-1' },
         }">
@@ -215,7 +191,7 @@ watch(
               class="border-2 border-solid border-grey" />
             <div class="flex flex-col">
               <a :href="row.url" target="_blank">
-                <h5 class="font-semibold text-blue-700 hover:underline">
+                <h5 class="font-semibold text-blue-800 hover:underline">
                   {{ row.player_name }}
                 </h5>
               </a>
@@ -232,7 +208,7 @@ watch(
         </template>
         <template #scarcity-data="{ row }">
           <span
-            class="p-1 rounded text-white"
+            class="p-1 rounded text-neutral-800"
             :style="{ background: row.scarcity.colour }">
             {{ row.scarcity.value }}%
           </span>
