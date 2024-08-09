@@ -1,4 +1,5 @@
 import type { ProjectionsPlayer } from '@/server/api/projections';
+import type { InjuredPlayer } from '@/server/api/injuries';
 
 export type Position = 'QB' | 'WR' | 'RB' | 'TE' | 'DST';
 
@@ -21,4 +22,5 @@ export interface Player {
     ave: string;
   };
   stats: Omit<ProjectionsPlayer, 'player_id' | 'player' | 'fpts'>;
+  injury?: InjuredPlayer;
 }

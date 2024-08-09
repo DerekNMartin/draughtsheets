@@ -164,6 +164,11 @@ watch(
   },
   { immediate: true }
 );
+
+const injuryMapping = {
+  Q: 'ring-amber-500',
+  O: 'ring-red-500',
+};
 </script>
 
 <template>
@@ -204,10 +209,20 @@ watch(
         }">
         <template #player_name-data="{ row }">
           <div class="flex gap-4 items-center">
-            <UAvatar
-              :src="row.image"
-              :alt="row.player_name"
-              class="ring-2 ring-slate-200 dark:ring-slate-700" />
+            <UTooltip
+              :text="
+                row.injury &&
+                `${row.injury.injury_type} | ${row.injury.comment}`
+              "
+              :prevent="!Boolean(row.injury)">
+              <UAvatar
+                :src="row.image"
+                :alt="row.player_name"
+                :class="[row?.injury?.status_short
+                    ? injuryMapping[row?.injury?.status_short as keyof typeof injuryMapping]
+                    : 'ring-slate-200 dark:ring-slate-700']"
+                class="ring-2" />
+            </UTooltip>
             <div class="flex flex-col">
               <a :href="row.url" target="_blank">
                 <h5

@@ -2,6 +2,8 @@
 import type { Player, Position } from '@/types/player.ts';
 import { formatOrdinals } from '@/utils/numbers';
 
+const { data: playerInjuriesData } = await useFetch('/api/injuries');
+
 const { data: qbProjectionData } = await useFetch('/api/projections', {
   query: { position: 'qb' },
 });
@@ -58,6 +60,9 @@ const allPlayerData = computed<Player[]>(() => {
         teProjectionData.value || [],
         kProjectionData.value || []
       );
+      const matchingInjuredPlayer = playerInjuriesData?.value?.find(
+        ({ player_id }) => player_id === playerData?.player_id
+      );
       const matchingPlayerProjection = combinedPositionProjectionData?.find(
         ({ player_id }) => player_id === playerData.player_id.toString()
       );
@@ -85,6 +90,7 @@ const allPlayerData = computed<Player[]>(() => {
           ave: playerData.rank_ave,
         },
         stats,
+        injury: matchingInjuredPlayer,
       };
       if (matchingPlayerProjection) data.push(player);
       return data;
