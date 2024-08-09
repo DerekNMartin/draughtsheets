@@ -13,8 +13,8 @@ export interface Player {
   fpts?: number;
   vorp?: number;
   scarcity?: number;
+  round_pick: string;
   rank: {
-    roundPick: string;
     ecr: number;
     min: string;
     max: string;

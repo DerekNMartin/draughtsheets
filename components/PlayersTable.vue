@@ -16,6 +16,7 @@ const props = defineProps<{
   filter?: { team: string };
   minMax: { min: number; max: number };
   position: Exclude<Position, 'DST'>;
+  picks?: number[];
 }>();
 
 const columns = [
@@ -24,7 +25,7 @@ const columns = [
     label: 'Player',
   },
   {
-    key: 'rank.roundPick',
+    key: 'round_pick',
     label: 'ECR',
   },
   {
@@ -49,16 +50,32 @@ const sort = ref({
   direction: 'desc',
 });
 
-// TODO: Adjust based on leage team size
+// TODO: Adjust replacement based on leage team size
 const positionTableType = computed(() => {
   const mapping: Record<
     Exclude<Position, 'DST'>,
-    { title: string; replacement: number }
+    { title: string; replacement: number; ring: string }
   > = {
-    QB: { title: 'Quarterback', replacement: 15 },
-    RB: { title: 'Running Back', replacement: 36 },
-    WR: { title: 'Wide Receiver', replacement: 46 },
-    TE: { title: 'Tight End', replacement: 17 },
+    QB: {
+      title: 'Quarterback',
+      replacement: 15,
+      ring: 'ring-red-200 dark:ring-red-300',
+    },
+    RB: {
+      title: 'Running Back',
+      replacement: 36,
+      ring: 'ring-blue-200 dark:ring-blue-300',
+    },
+    WR: {
+      title: 'Wide Receiver',
+      replacement: 46,
+      ring: 'ring-emerald-300 dark:ring-emerald-300',
+    },
+    TE: {
+      title: 'Tight End',
+      replacement: 17,
+      ring: 'ring-amber-300 dark:ring-amber-200',
+    },
   };
   return mapping[props.position];
 });
@@ -150,10 +167,12 @@ watch(
 </script>
 
 <template>
-  <UCard :ui="{ body: { padding: 'sm:p-0 p-0' } }">
+  <UCard
+    :ui="{ ring: positionTableType.ring, body: { padding: 'sm:p-0 p-0' } }">
     <template #header>
-      <section class="flex justify-between items-center">
-        <h2>{{ positionTableType.title }}</h2>
+      <section
+        class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2">
+        <h2 class="font-semibold">{{ positionTableType.title }}</h2>
         <div class="flex items-center gap-1">
           <label class="text-xs">Replacement</label>
           <UInput
@@ -165,7 +184,7 @@ watch(
             <UAvatar
               :src="replacementPlayer.image"
               :alt="replacementPlayer.player_name"
-              class="border-2 border-solid border-gray-200 dark:border-gray-700" />
+              class="ring-2 ring-slate-200 dark:ring-slate-700" />
           </UTooltip>
         </div>
       </section>
@@ -188,16 +207,27 @@ watch(
             <UAvatar
               :src="row.image"
               :alt="row.player_name"
-              class="border-2 border-solid border-grey" />
+              class="ring-2 ring-slate-200 dark:ring-slate-700" />
             <div class="flex flex-col">
               <a :href="row.url" target="_blank">
-                <h5 class="font-semibold text-blue-800 hover:underline">
+                <h5
+                  class="font-semibold text-blue-800 dark:text-blue-400 hover:underline">
                   {{ row.player_name }}
                 </h5>
               </a>
               <span>{{ row.team }} | {{ row.bye_week }}</span>
             </div>
           </div>
+        </template>
+        <template #round_pick-data="{ row }">
+          <span
+            :class="{
+              'text-neutral-800 dark:text-slate-200 font-bold': picks?.includes(
+                row.rank.ecr
+              ),
+            }">
+            {{ row.round_pick }}
+          </span>
         </template>
         <template #vorp-data="{ row }">
           <span

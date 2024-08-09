@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   app: {
     head: {
-      title: 'DraghtSheets',
+      title: 'DraughtSheets',
     },
   },
 });

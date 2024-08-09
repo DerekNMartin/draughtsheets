@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Player, Position } from '@/types/player.ts';
+import { formatOrdinals } from '@/utils/numbers';
 
 const { data: qbProjectionData } = await useFetch('/api/projections', {
   query: { position: 'qb' },
@@ -43,7 +44,7 @@ const leagueSelected = ref(leagueSelectOptions[2]);
 function calculateRoundPick(ecr: number) {
   const round = Math.ceil(ecr / leagueSelected.value.id);
   const pick = ecr % leagueSelected.value.id || leagueSelected.value.id;
-  return [round, pick];
+  return [round, String(pick).padStart(2, '0')];
 }
 
 const allPlayerData = computed<Player[]>(() => {
@@ -76,8 +77,8 @@ const allPlayerData = computed<Player[]>(() => {
         bye_week: playerData.player_bye_week,
         tier: playerData.tier,
         fpts: Number(matchingPlayerProjection?.fpts),
+        round_pick: calculateRoundPick(playerData.rank_ecr).join(' | '),
         rank: {
-          roundPick: calculateRoundPick(playerData.rank_ecr).join('|'),
           ecr: playerData.rank_ecr,
           min: playerData.rank_min,
           max: playerData.rank_max,
@@ -143,43 +144,76 @@ const teamSelectOptions = computed(() => {
 });
 const teamSelected = ref(teamSelectOptions.value[0]);
 
-const colorMode = useColorMode();
-const isDark = computed({
-  get() {
-    return colorMode.value === 'dark';
-  },
-  set() {
-    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
-  },
+const pickSelectOptions = computed(() => {
+  return Array.from({ length: leagueSelected.value.id }, (_, i) => {
+    const pick = i + 1;
+    return {
+      id: pick,
+      label: formatOrdinals(pick),
+    };
+  });
+});
+const pickSelected = ref(pickSelectOptions.value[0]);
+watch(leagueSelected, (newValue) => {
+  if (pickSelected.value.id > newValue.id)
+    pickSelected.value = pickSelectOptions.value[0];
+});
+const myDraftPicks = computed(() => {
+  const myPicks = [];
+  const rounds = 16;
+  const teams = leagueSelected.value.id;
+  const position = pickSelected.value.id;
+  for (let round = 1; round <= rounds; round++) {
+    const pick = round % 2 === 0 ? teams - (position - 1) : position;
+    const pickNumber = (round - 1) * teams + pick;
+    myPicks.push(pickNumber);
+  }
+  return myPicks;
 });
 </script>
 
 <template>
-  <main class="flex gap-6 flex-col p-6">
-    <section class="flex items-center justify-between">
-      <div class="flex items-center gap-1">
-        <UIcon name="i-ph-beer-stein-bold" class="h-6 w-6 scale-x-[-1]" />
-        <h1 class="text-xl font-bold">DraughtSheets</h1>
-      </div>
-      <div>
-        <ClientOnly>
-          <UButton
-            :icon="
-              isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'
-            "
-            color="gray"
-            variant="ghost"
-            aria-label="Theme"
-            @click="isDark = !isDark" />
-          <template #fallback>
-            <div class="w-8 h-8" />
-          </template>
-        </ClientOnly>
-      </div>
-    </section>
+  <div class="flex gap-6 flex-col">
     <UCard
       :ui="{
-        body: { base: 'grid grid-cols-[3fr,1fr,1fr,1fr] gap-4 items-end' },
+        body: {
+          base: 'grid sm:grid-cols-3 sm:grid-rows-[1fr,auto] gap-4 items-end',
+        },
+      }">
+      <AppSelect
+        v-model="scoringSelected"
+        :options="scoringSelectOptions"
+        label="Scoring"
+        label-attribute="label" />
+      <AppSelect
+        v-model="leagueSelected"
+        :options="leagueSelectOptions"
+        label="League"
+        label-attribute="label" />
+      <AppSelect
+        v-model="pickSelected"
+        class="min-w-24"
+        :options="pickSelectOptions"
+        label="Pick"
+        label-attribute="label" />
+      <section
+        class="flex gap-2 sm:items-center sm:col-span-3 sm:flex-row flex-col">
+        <h3 class="text-sm">Picks:</h3>
+        <div class="flex gap-2 flex-wrap">
+          <p
+            v-for="pick in myDraftPicks"
+            :key="pick"
+            class="rounded bg-neutral-100 dark:bg-slate-800 py-1 px-2 text-neutral-600 dark:text-slate-400 text-sm font-semibold min-w-fit">
+            {{ calculateRoundPick(pick).join(' | ') }}
+          </p>
+        </div>
+      </section>
+    </UCard>
+    <UCard
+      :ui="{
+        body: {
+          base: 'grid sm:grid-cols-[2fr,1fr] gap-4 items-end',
+        },
       }">
       <div>
         <label
@@ -196,24 +230,15 @@ const isDark = computed({
         v-model="teamSelected"
         :options="teamSelectOptions"
         label="Team" />
-      <AppSelect
-        v-model="leagueSelected"
-        :options="leagueSelectOptions"
-        label="League"
-        label-attribute="label" />
-      <AppSelect
-        v-model="scoringSelected"
-        :options="scoringSelectOptions"
-        label="Scoring"
-        label-attribute="label" />
     </UCard>
-    <section class="grid 2xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-6">
+    <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
         :data="qbTableData"
         position="QB"
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
+        :picks="myDraftPicks"
         @min-max="handleMinMax" />
       <PlayersTable
         :data="rbTableData"
@@ -221,6 +246,7 @@ const isDark = computed({
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
+        :picks="myDraftPicks"
         @min-max="handleMinMax" />
       <PlayersTable
         :data="wrTableData"
@@ -228,6 +254,7 @@ const isDark = computed({
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
+        :picks="myDraftPicks"
         @min-max="handleMinMax" />
       <PlayersTable
         :data="teTableData"
@@ -235,7 +262,8 @@ const isDark = computed({
         :min-max="combinedMinMax"
         :search="searchValue"
         :filter
+        :picks="myDraftPicks"
         @min-max="handleMinMax" />
     </section>
-  </main>
+  </div>
 </template>
