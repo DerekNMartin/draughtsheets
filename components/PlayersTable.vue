@@ -155,6 +155,9 @@ const injuryMapping = {
         :sort
         :ui="{
           wrapper: 'h-[600px] overflow-auto',
+          tr: {
+            base: 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
+          },
           th: {
             base: 'sticky top-0 bg-white dark:bg-gray-900 z-10',
             padding: 'px-2 py-4',
