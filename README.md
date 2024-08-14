@@ -56,7 +56,8 @@ pnpm run preview
 - [ ] Ability to remove drafted players
 - [ ] Defence Sheet - Show upcoming opponents
 - [ ] Calculate Sleeper Score by comparing value rank vs adp rank
-- [ ] Ability to input league settings and calculate fantasy point projections based on projected stats
+- [x] Ability to input league settings and calculate fantasy point projections based on projected stats
+- [ ] Apply settings to URL params
 - [ ] CRON to pull FP data
 - [ ] Store data on database
 - [ ] Move data manipulation/calculations to server

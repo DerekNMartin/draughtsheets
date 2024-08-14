@@ -149,45 +149,68 @@ const allPlayerData = computed<Player[]>(() => {
   return tableData;
 });
 
+function calculateVorp(
+  playerData: Player[],
+  position: Exclude<Position, 'DST'>
+) {
+  const replacementMapping = {
+    QB: leagueSelected.value.id,
+    RB: leagueSelected.value.id * 2,
+    WR: leagueSelected.value.id * 3,
+    TE: leagueSelected.value.id,
+  };
+  const replacementIndex = replacementMapping[position];
+  const replacementPlayer = playerData[replacementIndex];
+
+  return playerData.map((player) => {
+    const vorp = Number(player.fpts) - Number(replacementPlayer.fpts);
+    return {
+      ...player,
+      vorp: Number(vorp.toFixed(1)),
+    };
+  });
+}
+
 const qbTableData = computed(() => {
-  return allPlayerData.value.filter(
-    (player) => player.position.toLowerCase() === 'qb'
+  const players = allPlayerData.value.filter(
+    (player) => player.position === 'QB'
   );
+  return calculateVorp(players, 'QB');
 });
 const rbTableData = computed(() => {
-  return allPlayerData.value.filter(
-    (player) => player.position.toLowerCase() === 'rb'
+  const players = allPlayerData.value.filter(
+    (player) => player.position === 'RB'
   );
+  return calculateVorp(players, 'RB');
 });
 const wrTableData = computed(() => {
-  return allPlayerData.value.filter(
-    (player) => player.position.toLowerCase() === 'wr'
+  const players = allPlayerData.value.filter(
+    (player) => player.position === 'WR'
   );
+  return calculateVorp(players, 'WR');
 });
 const teTableData = computed(() => {
-  return allPlayerData.value.filter(
-    (player) => player.position.toLowerCase() === 'te'
+  const players = allPlayerData.value.filter(
+    (player) => player.position === 'TE'
   );
+  return calculateVorp(players, 'TE');
 });
 
 /**
- * Collect the min and max value of players across each position table, to determine the overall
- * min and max value across all players. Used for colour interpolation.
+ * Determine the overall min and max value across all players. Used for colour interpolation.
  */
-const combinedMinMax = reactive({ min: 0, max: 0 });
-function handleMinMax(minMax: { min: number; max: number }) {
-  const { min, max } = minMax;
-  if (min < combinedMinMax.min) combinedMinMax.min = min;
-  if (max > combinedMinMax.max) combinedMinMax.max = max;
-}
-
-const searchValue = ref();
-
-const filter = computed(() => {
-  return {
-    team: teamSelected.value,
-  };
+const minMaxVorp = computed(() => {
+  const allPlayer = [
+    ...qbTableData.value,
+    ...rbTableData.value,
+    ...wrTableData.value,
+    ...teTableData.value,
+  ];
+  const min = Math.min(...(allPlayer.map(({ vorp }) => vorp) || 0));
+  const max = Math.max(...(allPlayer.map(({ vorp }) => vorp) || 0));
+  return { min, max };
 });
+
 const teamSelectOptions = computed(() => {
   const teams = allPlayerData.value
     .reduce<string[]>((teams, player) => {
@@ -225,6 +248,14 @@ const myDraftPicks = computed(() => {
     myPicks.push(pickNumber);
   }
   return myPicks;
+});
+
+const searchValue = ref();
+
+const filter = computed(() => {
+  return {
+    team: teamSelected.value,
+  };
 });
 </script>
 
@@ -312,37 +343,33 @@ const myDraftPicks = computed(() => {
     </UCard>
     <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
-        :data="qbTableData"
         position="QB"
-        :min-max="combinedMinMax"
+        :data="qbTableData"
+        :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="myDraftPicks"
-        @min-max="handleMinMax" />
+        :picks="myDraftPicks" />
       <PlayersTable
-        :data="rbTableData"
         position="RB"
-        :min-max="combinedMinMax"
+        :data="rbTableData"
+        :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="myDraftPicks"
-        @min-max="handleMinMax" />
+        :picks="myDraftPicks" />
       <PlayersTable
-        :data="wrTableData"
         position="WR"
-        :min-max="combinedMinMax"
+        :data="wrTableData"
+        :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="myDraftPicks"
-        @min-max="handleMinMax" />
+        :picks="myDraftPicks" />
       <PlayersTable
-        :data="teTableData"
         position="TE"
-        :min-max="combinedMinMax"
+        :data="teTableData"
+        :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="myDraftPicks"
-        @min-max="handleMinMax" />
+        :picks="myDraftPicks" />
     </section>
   </div>
 </template>

@@ -7,8 +7,6 @@ interface TablePlayer extends Omit<Player, 'scarcity'> {
   vorpColor?: string;
 }
 
-const emit = defineEmits(['minMax']);
-
 const props = defineProps<{
   data: Player[];
   header?: string;
@@ -50,41 +48,30 @@ const sort = ref({
   direction: 'desc',
 });
 
-// TODO: Adjust replacement based on leage team size
 const positionTableType = computed(() => {
   const mapping: Record<
     Exclude<Position, 'DST'>,
-    { title: string; replacement: number; ring: string }
+    { title: string; ring: string }
   > = {
     QB: {
       title: 'Quarterback',
-      replacement: 15,
       ring: 'ring-red-200 dark:ring-red-300',
     },
     RB: {
       title: 'Running Back',
-      replacement: 36,
       ring: 'ring-blue-200 dark:ring-blue-300',
     },
     WR: {
       title: 'Wide Receiver',
-      replacement: 46,
       ring: 'ring-emerald-300 dark:ring-emerald-300',
     },
     TE: {
       title: 'Tight End',
-      replacement: 17,
       ring: 'ring-amber-300 dark:ring-amber-200',
     },
   };
   return mapping[props.position];
 });
-const replacementValue = ref(positionTableType.value.replacement);
-const replacementPlayer = computed(() => props.data[replacementValue.value]);
-function calcVorp(projectedPoints?: string | number) {
-  const vorp = Number(projectedPoints) - Number(replacementPlayer.value?.fpts);
-  return replacementPlayer.value ? Number(vorp.toFixed(1)) : 0;
-}
 
 function calcScarcity(data: Player[]) {
   const totalValue = data.reduce(
@@ -118,23 +105,19 @@ function calcScarcity(data: Player[]) {
 }
 
 const tableData = computed(() => {
-  const tableData: Player[] = props.data.map((player) => {
-    const vorp = calcVorp(player?.fpts);
+  const data = calcScarcity(props.data);
+  return data.map((player) => {
     return {
       ...player,
-      vorp,
       vorpColour: interpolateRgbColor(
         'rgb(220, 38, 38)',
         'rgb(5, 150, 105)',
         props.minMax.min,
         props.minMax.max,
-        vorp
+        player.vorp || 0
       ),
     };
   });
-
-  const scarcityTableData = calcScarcity(tableData);
-  return scarcityTableData;
 });
 
 const filteredData = computed(() => {
@@ -150,21 +133,6 @@ const filteredData = computed(() => {
     });
 });
 
-const minMaxPlayerValue = computed(() => {
-  const allVorp = tableData.value.map(({ vorp }) => vorp || 0);
-  return {
-    min: Math.min(...allVorp),
-    max: Math.max(...allVorp),
-  };
-});
-watch(
-  minMaxPlayerValue,
-  (newValue) => {
-    emit('minMax', newValue);
-  },
-  { immediate: true }
-);
-
 const injuryMapping = {
   Q: 'ring-amber-500',
   O: 'ring-red-500',
@@ -178,20 +146,6 @@ const injuryMapping = {
       <section
         class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2">
         <h2 class="font-semibold">{{ positionTableType.title }}</h2>
-        <div class="flex items-center gap-1">
-          <label class="text-xs">Replacement</label>
-          <UInput
-            v-model="replacementValue"
-            size="xs"
-            type="number"
-            class="w-16" />
-          <UTooltip :text="replacementPlayer.player_name">
-            <UAvatar
-              :src="replacementPlayer.image"
-              :alt="replacementPlayer.player_name"
-              class="ring-2 ring-slate-200 dark:ring-slate-700" />
-          </UTooltip>
-        </div>
       </section>
     </template>
     <section>
