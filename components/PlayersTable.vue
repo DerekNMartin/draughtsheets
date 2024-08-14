@@ -81,8 +81,8 @@ const positionTableType = computed(() => {
 });
 const replacementValue = ref(positionTableType.value.replacement);
 const replacementPlayer = computed(() => props.data[replacementValue.value]);
-function calcVorp(player: Player) {
-  const vorp = Number(player.fpts) - Number(replacementPlayer.value?.fpts);
+function calcVorp(projectedPoints?: string | number) {
+  const vorp = Number(projectedPoints) - Number(replacementPlayer.value?.fpts);
   return replacementPlayer.value ? Number(vorp.toFixed(1)) : 0;
 }
 
@@ -119,7 +119,7 @@ function calcScarcity(data: Player[]) {
 
 const tableData = computed(() => {
   const tableData: Player[] = props.data.map((player) => {
-    const vorp = calcVorp(player);
+    const vorp = calcVorp(player?.fpts);
     return {
       ...player,
       vorp,

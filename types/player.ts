@@ -11,7 +11,7 @@ export interface Player {
   image: string;
   bye_week: string;
   tier: number;
-  fpts?: number;
+  fpts?: string;
   vorp?: number;
   scarcity?: number;
   round_pick: string;

@@ -49,6 +49,50 @@ function calculateRoundPick(ecr: number) {
   return [round, String(pick).padStart(2, '0')];
 }
 
+const pointsMapping = reactive({
+  passing: {
+    tds: 4,
+    yds: 0.04,
+    cmp: 0,
+    ints: -1.0,
+  },
+  rushing: {
+    tds: 6,
+    yds: 0.1,
+  },
+  receiving: {
+    tds: 6,
+    yds: 0.1,
+  },
+  misc: {
+    fl: -2.0,
+  },
+});
+type PointsMapping = typeof pointsMapping;
+type StatCategory = keyof PointsMapping;
+function calculateTotalPoints(stats: Player['stats']): string {
+  let totalPoints = 0;
+
+  for (const category in stats) {
+    const statCategory = stats[category as StatCategory];
+    const pointsCategory = pointsMapping[category as StatCategory];
+
+    if (statCategory && pointsCategory) {
+      for (const stat in statCategory) {
+        const statPoints: number =
+          pointsCategory[stat as keyof typeof pointsCategory];
+        const statValue: string =
+          statCategory[stat as keyof typeof pointsCategory];
+        if (statPoints && statValue) {
+          totalPoints += parseFloat(statValue.replace(',', '')) * statPoints;
+        }
+      }
+    }
+  }
+
+  return totalPoints.toFixed(1);
+}
+
 const allPlayerData = computed<Player[]>(() => {
   if (!rankingData.value?.players) return [];
   const tableData = rankingData.value?.players
@@ -81,7 +125,7 @@ const allPlayerData = computed<Player[]>(() => {
         image: playerData.player_image_url,
         bye_week: playerData.player_bye_week,
         tier: playerData.tier,
-        fpts: Number(matchingPlayerProjection?.fpts),
+        fpts: calculateTotalPoints(stats),
         round_pick: calculateRoundPick(playerData.rank_ecr).join(' | '),
         rank: {
           ecr: playerData.rank_ecr,
@@ -198,10 +242,33 @@ const myDraftPicks = computed(() => {
         label-attribute="label" />
       <AppSelect
         v-model="pickSelected"
-        class="min-w-24"
         :options="pickSelectOptions"
         label="Pick"
         label-attribute="label" />
+      <section class="sm:flex-row flex-col flex sm:col-span-3 gap-4">
+        <div
+          v-for="(_, categoryKey) in pointsMapping"
+          :key="categoryKey"
+          class="flex flex-col">
+          <h5
+            class="capitalize text-xs font-semibold light:text-slate-600 dark:text-white mb-1">
+            {{ categoryKey }}
+          </h5>
+          <div class="flex gap-1 flex-wrap">
+            <UInput
+              v-for="(value, key) in pointsMapping[categoryKey]"
+              :key="`${categoryKey}-${key}`"
+              v-model="pointsMapping[categoryKey][key]"
+              size="md"
+              type="number"
+              class="sm:w-28 w-full">
+              <template #trailing>
+                <span class="text-xs text-slate-500 uppercase">{{ key }}</span>
+              </template>
+            </UInput>
+          </div>
+        </div>
+      </section>
       <section
         class="flex gap-2 sm:items-center sm:col-span-3 sm:flex-row flex-col">
         <h3 class="text-sm">Picks:</h3>
