@@ -35,6 +35,11 @@ const rankingQuery = computed(() => {
 const { data: rankingData } = await useFetch('/api/rankings', {
   query: rankingQuery,
 });
+watch(scoringSelected, ({ id }) => {
+  if (id === 'STD') pointsMapping.receiving.rec = 0;
+  if (id === 'PPR') pointsMapping.receiving.rec = 1;
+  if (id === 'HALF') pointsMapping.receiving.rec = 0.5;
+});
 
 const leagueSelectOptions = [
   { id: 8, label: '8 Team' },
@@ -61,6 +66,7 @@ const pointsMapping = reactive({
     yds: 0.1,
   },
   receiving: {
+    rec: 0,
     tds: 6,
     yds: 0.1,
   },
