@@ -128,7 +128,10 @@ const allPlayerData = computed<Player[]>(() => {
         team: playerData.player_team_id,
         position: playerData.player_position_id as Position,
         url: playerData.player_page_url,
-        image: playerData.player_image_url,
+        image: playerData.player_image_url.replace(
+          '210x210.png',
+          '100x100.webp'
+        ),
         bye_week: playerData.player_bye_week,
         tier: playerData.tier,
         fpts: calculateTotalPoints(stats),
