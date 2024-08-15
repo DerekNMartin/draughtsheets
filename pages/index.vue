@@ -316,8 +316,11 @@ const filter = computed(() => {
           <p
             v-for="pick in myDraftPicks"
             :key="pick"
-            class="rounded bg-neutral-100 dark:bg-slate-800 py-1 px-2 text-neutral-600 dark:text-slate-400 text-sm font-semibold min-w-fit">
-            {{ calculateRoundPick(pick).join(' | ') }}
+            class="rounded bg-neutral-100 dark:bg-slate-800 py-1 px-2 text-neutral-600 dark:text-slate-400 text-sm font-semibold min-w-16 group text-center cursor-default">
+            <span class="group-hover:hidden">{{
+              calculateRoundPick(pick).join(' | ')
+            }}</span>
+            <span class="group-hover:inline-block hidden">{{ pick }}</span>
           </p>
         </div>
       </section>

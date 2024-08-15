@@ -192,14 +192,18 @@ const injuryMapping = {
           </div>
         </template>
         <template #round_pick-data="{ row }">
-          <span
+          <div
+            class="group"
             :class="{
               'text-neutral-800 dark:text-slate-200 font-bold': picks?.includes(
                 row.rank.ecr
               ),
             }">
-            {{ row.round_pick }}
-          </span>
+            <span class="group-hover:hidden">{{ row.round_pick }}</span>
+            <span class="group-hover:inline-block hidden">
+              {{ row.rank.ecr }}
+            </span>
+          </div>
         </template>
         <template #vorp-data="{ row }">
           <span
