@@ -1,13 +1,26 @@
 <script setup lang="ts">
-defineProps<{
-  options: unknown[];
+export type SelectOption = { value: string | number; label: string };
+
+interface AppSelectProps {
+  options: SelectOption[] | string[] | number[];
   label?: string;
   labelAttribute?: string;
   valueAttribute?: string;
-}>();
-const selected = defineModel<
-  Record<string, string | number> | string | number
->();
+}
+
+const props = defineProps<AppSelectProps>();
+const selected = defineModel<SelectOption | string | number>();
+
+const computedLabel = computed(() => {
+  const value = props.options.find((option) => {
+    if (typeof option === 'object' && 'value' in option) {
+      return option.value === selected.value;
+    }
+  });
+  return typeof value === 'object' && 'label' in value
+    ? value.label
+    : selected.value;
+});
 </script>
 
 <template>
@@ -30,11 +43,7 @@ const selected = defineModel<
         :class="{
           'ring-2 ring-primary-500 dark:ring-primary-400': open,
         }">
-        {{
-          selected && labelAttribute
-            ? selected[labelAttribute as keyof typeof selected]
-            : selected
-        }}
+        {{ computedLabel }}
         <UIcon
           name="i-heroicons-chevron-down-20-solid"
           class="w-5 h-5 transition-transform"
