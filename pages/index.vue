@@ -1,38 +1,18 @@
 <script setup lang="ts">
 import type { Player, Position } from '@/types/player.ts';
 import { calculateRoundPick } from '@/utils/strings.js';
+import { usePlayersStore } from '@/stores/players';
 
-const scoringType = ref('STD');
+const store = usePlayersStore();
+
+const scoringType = ref<'STD' | 'PPR' | 'HALF'>('STD');
 const leagueSize = ref(12);
 const pickNumber = ref(1);
 
-const { data: playerInjuriesData } = await useFetch('/api/injuries');
-
-const { data: qbProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'qb' },
-});
-const { data: wrProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'wr' },
-});
-const { data: rbProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'rb' },
-});
-const { data: teProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'te' },
-});
-const { data: kProjectionData } = await useFetch('/api/projections', {
-  query: { position: 'k' },
-});
-
-const rankingQuery = computed(() => {
-  return {
-    position: 'all',
-    scoring: scoringType.value,
-  };
-});
-const { data: rankingData } = await useFetch('/api/rankings', {
-  query: rankingQuery,
-});
+store.fetchAllPlayerData(scoringType.value);
+const allPlayerData = computed(() => store.allPlayerData);
+const isFetchingPlayerData = computed(() => store.isFetchingPlayerData);
+watch(scoringType, (newValue) => store.fetchAllPlayerData(newValue));
 
 const pointsMapping = reactive({
   passing: {
@@ -84,60 +64,16 @@ watch(scoringType, (newValue) => {
   if (newValue === 'HALF') pointsMapping.receiving.rec = 0.5;
 });
 
-const allPlayerData = computed<Player[]>(() => {
-  if (!rankingData.value?.players) return [];
-  const tableData = rankingData.value?.players
-    .filter(({ player_team_id }) => player_team_id !== 'FA')
-    .reduce<Player[]>((data, playerData) => {
-      const combinedPositionProjectionData = qbProjectionData.value?.concat(
-        wrProjectionData.value || [],
-        rbProjectionData.value || [],
-        teProjectionData.value || [],
-        kProjectionData.value || []
-      );
-      const matchingInjuredPlayer = playerInjuriesData?.value?.find(
-        ({ player_id }) => player_id === playerData?.player_id
-      );
-      const matchingPlayerProjection = combinedPositionProjectionData?.find(
-        ({ player_id }) => player_id === playerData.player_id.toString()
-      );
-      const {
-        player_id,
-        player: name,
-        fpts,
-        ...stats
-      } = matchingPlayerProjection || {};
-
-      const player: Player = {
-        player_name: playerData.player_name,
-        team: playerData.player_team_id,
-        position: playerData.player_position_id as Position,
-        url: playerData.player_page_url,
-        image: playerData.player_image_url.replace(
-          '210x210.png',
-          '100x100.webp'
-        ),
-        bye_week: playerData.player_bye_week,
-        tier: playerData.tier,
-        fpts: calculateTotalPoints(stats),
-        round_pick: calculateRoundPick(
-          playerData.rank_ecr,
-          leagueSize.value
-        ).join(' | '),
-        rank: {
-          ecr: playerData.rank_ecr,
-          min: playerData.rank_min,
-          max: playerData.rank_max,
-          ave: playerData.rank_ave,
-        },
-        stats,
-        injury: matchingInjuredPlayer,
-      };
-      if (matchingPlayerProjection) data.push(player);
-      return data;
-    }, []);
-
-  return tableData;
+const allTableData = computed<Player[]>(() => {
+  return allPlayerData.value.map((player) => {
+    return {
+      ...player,
+      fpts: calculateTotalPoints(player.stats),
+      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(
+        ' | '
+      ),
+    };
+  });
 });
 
 function calculateVorp(
@@ -162,7 +98,7 @@ function calculateVorp(
   });
 }
 function getPositionTableData(position: Exclude<Position, 'DST'>) {
-  const players = allPlayerData.value.filter(
+  const players = allTableData.value.filter(
     (player) => player.position === position
   );
   return calculateVorp(players, position);
@@ -188,7 +124,7 @@ const minMaxVorp = computed(() => {
 });
 
 const teamSelectOptions = computed(() => {
-  const teams = allPlayerData.value
+  const teams = allTableData.value
     .reduce<string[]>((teams, player) => {
       if (!teams.includes(player.team)) teams.push(player.team);
       return teams;
@@ -220,6 +156,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
     <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
         position="QB"
+        :loading="isFetchingPlayerData"
         :data="qbTableData"
         :min-max="minMaxVorp"
         :search="searchValue"
@@ -227,6 +164,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :picks="draftPicks" />
       <PlayersTable
         position="RB"
+        :loading="isFetchingPlayerData"
         :data="rbTableData"
         :min-max="minMaxVorp"
         :search="searchValue"
@@ -234,6 +172,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :picks="draftPicks" />
       <PlayersTable
         position="WR"
+        :loading="isFetchingPlayerData"
         :data="wrTableData"
         :min-max="minMaxVorp"
         :search="searchValue"
@@ -241,6 +180,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :picks="draftPicks" />
       <PlayersTable
         position="TE"
+        :loading="isFetchingPlayerData"
         :data="teTableData"
         :min-max="minMaxVorp"
         :search="searchValue"

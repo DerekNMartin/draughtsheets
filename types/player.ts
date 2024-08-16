@@ -14,7 +14,7 @@ export interface Player {
   fpts?: string;
   vorp?: number;
   scarcity?: number;
-  round_pick: string;
+  round_pick?: string;
   rank: {
     ecr: number;
     min: string;

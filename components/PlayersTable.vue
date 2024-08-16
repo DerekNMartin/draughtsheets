@@ -8,6 +8,7 @@ interface TablePlayer extends Omit<Player, 'scarcity'> {
 }
 
 const props = defineProps<{
+  loading?: boolean;
   data: Player[];
   header?: string;
   search?: string;
@@ -150,6 +151,7 @@ const injuryMapping = {
     </template>
     <section>
       <UTable
+        :loading
         :rows="filteredData"
         :columns="columns"
         :sort
