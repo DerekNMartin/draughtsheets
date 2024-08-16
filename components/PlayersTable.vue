@@ -2,10 +2,14 @@
 import type { Player, Position } from '@/types/player';
 import { interpolateRgbColor } from '@/utils/color.js';
 
+import { usePlayersStore } from '@/stores/players.js';
+
 interface TablePlayer extends Omit<Player, 'scarcity'> {
   scarcity?: { value: number; colour: string };
   vorpColor?: string;
 }
+
+const store = usePlayersStore();
 
 const props = defineProps<{
   loading?: boolean;
@@ -117,6 +121,9 @@ const tableData = computed(() => {
         props.minMax.max,
         player.vorp || 0
       ),
+      class: {
+        'filter grayscale bg-slate-50': store.isPlayerRemoved(player.player_id),
+      },
     };
   });
 });
@@ -138,6 +145,10 @@ const injuryMapping = {
   Q: 'ring-amber-500',
   O: 'ring-red-500',
 };
+
+function handleRemovePlayer(player: Player) {
+  store.removePlayer(player);
+}
 </script>
 
 <template>
@@ -158,14 +169,15 @@ const injuryMapping = {
         :ui="{
           wrapper: 'h-[600px] overflow-auto',
           tr: {
-            base: 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
+            base: 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
           },
           th: {
             base: 'sticky top-0 bg-white dark:bg-gray-900 z-10',
             padding: 'px-2 py-4',
           },
           td: { padding: 'px-2 py-1' },
-        }">
+        }"
+        @select="handleRemovePlayer">
         <template #player_name-data="{ row }">
           <div class="flex gap-4 items-center">
             <UTooltip

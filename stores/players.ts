@@ -12,6 +12,7 @@ export const usePlayersStore = defineStore('players', {
     wrProjectionData: [] as ProjectionsPlayer[],
     rbProjectionData: [] as ProjectionsPlayer[],
     teProjectionData: [] as ProjectionsPlayer[],
+    removedPlayers: [] as Player[],
   }),
   actions: {
     async fetchPlayerInjuryData() {
@@ -77,6 +78,7 @@ export const usePlayersStore = defineStore('players', {
               } = matchingPlayerProjection || {};
 
               const player: Player = {
+                player_id: playerData.player_id,
                 player_name: playerData.player_name,
                 team: playerData.player_team_id,
                 position: playerData.player_position_id as Position,
@@ -104,6 +106,21 @@ export const usePlayersStore = defineStore('players', {
         console.error(error);
       } finally {
         this.isFetchingPlayerData = false;
+      }
+    },
+    isPlayerRemoved(playerId: number) {
+      return this.removedPlayers.some(
+        ({ player_id }) => player_id === playerId
+      );
+    },
+    removePlayer(player: Player) {
+      const matchingIndex = this.removedPlayers.findIndex(
+        ({ player_id }) => player_id === player.player_id
+      );
+      if (matchingIndex === -1) {
+        this.removedPlayers.push(player);
+      } else {
+        this.removedPlayers.splice(matchingIndex, 1);
       }
     },
   },

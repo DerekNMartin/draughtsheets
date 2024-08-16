@@ -4,6 +4,7 @@ import type { InjuredPlayer } from '@/server/api/injuries';
 export type Position = 'QB' | 'WR' | 'RB' | 'TE' | 'DST';
 
 export interface Player {
+  player_id: number;
   player_name: string;
   team: string;
   position: Position;
