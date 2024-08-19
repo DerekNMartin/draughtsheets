@@ -1,5 +1,7 @@
 # DraughtSheets
 
+https://draughtsheets.netlify.app/
+
 Inspired by the legend, BeerSheets - DraughtSheets is a web-app that creates a ranking model for fantasy football snake drafts by calculating each player's value over replacement (VOR). The model is designed for standard, half-PPR, and PPR formats, with data sourced from FantasyPros. It focuses on identifying potential bargains by comparing VOR rankings with Average Draft Position (ADP) data.
 
 To calculate a player's value over replacement (VOR), identify a "replacement player" at each position whose projected points reflect the average positional value. Then, subtract this replacement value from each player's projected points within the same position. The result is the player's VOR, indicating how much better they are compared to the typical replacement player.
