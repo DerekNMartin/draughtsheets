@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import useSlideover from '@/composables/useSlideover';
+
+const { toggleSlideover } = useSlideover;
+
 const colorMode = useColorMode();
 const isDark = computed({
   get() {
@@ -17,7 +21,7 @@ const isDark = computed({
         <UIcon name="i-ph-beer-stein-bold" class="h-6 w-6 scale-x-[-1]" />
         <h1 class="text-xl font-bold">DraughtSheets</h1>
       </div>
-      <div>
+      <div class="flex gap-2">
         <ClientOnly>
           <UButton
             :icon="
@@ -31,6 +35,9 @@ const isDark = computed({
             <div class="w-8 h-8" />
           </template>
         </ClientOnly>
+        <UButton color="gray" aria-label="Theme" @click="toggleSlideover">
+          My Team
+        </UButton>
       </div>
     </section>
     <slot />

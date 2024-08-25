@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { Player, Position } from '@/types/player.ts';
-import { calculateRoundPick } from '@/utils/strings.js';
+import { calculateRoundPick } from '@/utils/strings';
 import { usePlayersStore } from '@/stores/players';
+import useSlideover from '@/composables/useSlideover';
 
 const store = usePlayersStore();
+const { isSlideoverOpen } = useSlideover;
 
 const scoringType = ref<'STD' | 'PPR' | 'HALF'>('STD');
 const leagueSize = ref(12);
@@ -187,5 +189,6 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :filter
         :picks="draftPicks" />
     </section>
+    <TeamSlideover v-model="isSlideoverOpen" />
   </div>
 </template>

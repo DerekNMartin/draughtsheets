@@ -122,7 +122,11 @@ const tableData = computed(() => {
         player.vorp || 0
       ),
       class: {
-        'filter grayscale bg-slate-50': store.isPlayerRemoved(player.player_id),
+        'filter grayscale !bg-slate-100 dark:!bg-slate-800':
+          store.isPlayerRemoved(player.player_id),
+        '!bg-yellow-100 dark:!bg-amber-900': store.isPlayerPicked(
+          player.player_id
+        ),
       },
     };
   });
@@ -148,6 +152,9 @@ const injuryMapping = {
 
 function handleRemovePlayer(player: Player) {
   store.removePlayer(player);
+}
+function handlePickPlayer(player: Player) {
+  store.pickPlayer(player);
 }
 </script>
 
@@ -179,7 +186,7 @@ function handleRemovePlayer(player: Player) {
         }"
         @select="handleRemovePlayer">
         <template #player_name-data="{ row }">
-          <div class="flex gap-4 items-center">
+          <div class="flex gap-4 items-center group/player-cell">
             <UTooltip
               :text="
                 row.injury &&
@@ -192,10 +199,18 @@ function handleRemovePlayer(player: Player) {
                 :class="[row?.injury?.status_short
                     ? injuryMapping[row?.injury?.status_short as keyof typeof injuryMapping]
                     : 'ring-slate-200 dark:ring-slate-700']"
-                class="ring-2" />
+                class="ring-2 relative">
+                <span
+                  class="absolute group-hover/player-cell:opacity-100 opacity-0 bg-white dark:bg-slate-800 w-full h-full rounded-full transition-opacity flex items-center justify-center group/pick-button"
+                  @click.stop="handlePickPlayer(row)">
+                  <UIcon
+                    name="i-ph-plus-bold"
+                    class="w-4 h-4 group-hover/player-cell:scale-100 scale-0 transition-transform delay-100 text-blue-800 dark:text-blue-400 group-hover/pick-button:scale-125" />
+                </span>
+              </UAvatar>
             </UTooltip>
             <div class="flex flex-col">
-              <a :href="row.url" target="_blank">
+              <a :href="row.url" target="_blank" @click.stop>
                 <h5
                   class="font-semibold text-blue-800 dark:text-blue-400 hover:underline">
                   {{ row.player_name }}

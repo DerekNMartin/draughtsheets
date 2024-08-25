@@ -13,6 +13,7 @@ export const usePlayersStore = defineStore('players', {
     rbProjectionData: [] as ProjectionsPlayer[],
     teProjectionData: [] as ProjectionsPlayer[],
     removedPlayers: [] as Player[],
+    teamPicks: [] as Player[],
   }),
   actions: {
     async fetchPlayerInjuryData() {
@@ -121,6 +122,19 @@ export const usePlayersStore = defineStore('players', {
         this.removedPlayers.push(player);
       } else {
         this.removedPlayers.splice(matchingIndex, 1);
+      }
+    },
+    isPlayerPicked(playerId: number) {
+      return this.teamPicks.some(({ player_id }) => player_id === playerId);
+    },
+    pickPlayer(player: Player) {
+      const matchingIndex = this.teamPicks.findIndex(
+        ({ player_id }) => player_id === player.player_id
+      );
+      if (matchingIndex === -1) {
+        this.teamPicks.push(player);
+      } else {
+        this.teamPicks.splice(matchingIndex, 1);
       }
     },
   },
