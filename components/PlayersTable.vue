@@ -4,12 +4,13 @@ import { interpolateRgbColor } from '@/utils/color.js';
 
 import { usePlayersStore } from '@/stores/players.js';
 
+import PlayerAvatar from '@/components/PlayerAvatar.vue';
+
 interface TablePlayer extends Omit<Player, 'scarcity'> {
   scarcity?: { value: number; colour: string };
   vorpColor?: string;
 }
 
-const toast = useToast();
 const store = usePlayersStore();
 
 const props = defineProps<{
@@ -146,30 +147,11 @@ const filteredData = computed(() => {
     });
 });
 
-const injuryMapping = {
-  Q: 'ring-amber-500',
-  O: 'ring-red-500',
-};
-
 function handleRemovePlayer(player: Player) {
-  if (!store.isPlayerRemoved(player.player_id)) {
-    toast.add({
-      title: `${player.player_name} has been removed`,
-      timeout: 3000,
-    });
-  }
   store.removePlayer(player);
 }
 function handlePickPlayer(player: Player) {
   store.pickPlayer(player);
-  const playerPickedMessage = store.isPlayerPicked(player.player_id)
-    ? 'added to'
-    : 'removed from';
-  const icon = store.isPlayerPicked(player.player_id)
-    ? 'i-ph-plus-bold'
-    : 'i-ph-minus-bold';
-  const toastMessage = `${player.player_name} has been ${playerPickedMessage} your team`;
-  toast.add({ title: toastMessage, icon, timeout: 3000 });
 }
 </script>
 
@@ -204,48 +186,7 @@ function handlePickPlayer(player: Player) {
         @select="handleRemovePlayer"
       >
         <template #player_name-data="{ row }">
-          <div class="flex gap-4 items-center group/player-cell">
-            <UTooltip
-              :text="
-                row.injury &&
-                `${row.injury.injury_type} | ${row.injury.comment}`
-              "
-              :prevent="!Boolean(row.injury)"
-            >
-              <UAvatar
-                :src="row.image"
-                :alt="row.player_name"
-                :class="[row?.injury?.status_short
-                    ? injuryMapping[row?.injury?.status_short as keyof typeof injuryMapping]
-                    : 'ring-slate-200 dark:ring-slate-600']"
-                class="ring-2 relative"
-              >
-                <span
-                  class="absolute group-hover/player-cell:opacity-100 opacity-0 bg-white dark:bg-slate-800 w-full h-full rounded-full transition-all flex items-center justify-center group/pick hover:bg-blue-50 dark:hover:bg-slate-700"
-                  @click.stop="handlePickPlayer(row)"
-                >
-                  <UIcon
-                    :name="
-                      store.isPlayerPicked(row.player_id)
-                        ? 'i-ph-minus-bold'
-                        : 'i-ph-plus-bold'
-                    "
-                    class="w-4 h-4 group-hover/player-cell:scale-100 scale-0 transition-transform delay-100 text-blue-800 dark:text-blue-400 group-hover/pick:scale-125"
-                  />
-                </span>
-              </UAvatar>
-            </UTooltip>
-            <div class="flex flex-col">
-              <a :href="row.url" target="_blank" @click.stop>
-                <h5
-                  class="font-semibold text-blue-800 dark:text-blue-400 hover:underline"
-                >
-                  {{ row.player_name }}
-                </h5>
-              </a>
-              <span>{{ row.team }} | {{ row.bye_week }}</span>
-            </div>
-          </div>
+          <PlayerAvatar :player="row" @avatar-click="handlePickPlayer"/>
         </template>
         <template #round_pick-data="{ row }">
           <div

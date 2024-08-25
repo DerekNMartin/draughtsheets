@@ -9,7 +9,8 @@ const teamPicks = computed(() => store.teamPicks);
   <USlideover
     v-model="isOpen"
     :overlay="false"
-    :ui="{ base: 'border-l border-solid border-slate-100 drop-shadow-lg' }">
+    :ui="{ base: 'border-l border-solid border-slate-100 drop-shadow-lg' }"
+  >
     <div class="flex p-6 gap-6 flex-col">
       <section class="flex justify-between items-center">
         <h2 class="text-lg font-semibold">My Team</h2>
@@ -20,11 +21,18 @@ const teamPicks = computed(() => store.teamPicks);
           icon="i-ph-x-bold"
           square
           padded
-          @click="isOpen = false" />
+          @click="isOpen = false"
+        />
       </section>
-      <p v-for="player in teamPicks" :key="player.player_id">
-        {{ player.player_name }}
-      </p>
+      <ul class="flex flex-col">
+        <li
+          v-for="player in teamPicks"
+          :key="player.player_id"
+          class="py-2 border-b border-solid border-neutral-200 last:border-none"
+        >
+          <PlayerAvatar :player="player" @avatar-click="store.pickPlayer"/>
+        </li>
+      </ul>
     </div>
   </USlideover>
 </template>

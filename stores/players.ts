@@ -115,11 +115,16 @@ export const usePlayersStore = defineStore('players', {
       );
     },
     removePlayer(player: Player) {
+      const toast = useToast();
       const matchingIndex = this.removedPlayers.findIndex(
         ({ player_id }) => player_id === player.player_id
       );
       if (matchingIndex === -1) {
         this.removedPlayers.push(player);
+        toast.add({
+          title: `${player.player_name} has been removed`,
+          timeout: 3000,
+        });
       } else {
         this.removedPlayers.splice(matchingIndex, 1);
       }
@@ -128,14 +133,20 @@ export const usePlayersStore = defineStore('players', {
       return this.teamPicks.some(({ player_id }) => player_id === playerId);
     },
     pickPlayer(player: Player) {
+      const toast = useToast();
       const matchingIndex = this.teamPicks.findIndex(
         ({ player_id }) => player_id === player.player_id
       );
-      if (matchingIndex === -1) {
+      const isNewPick = matchingIndex === -1;
+      const playerPickedMessage = isNewPick ? 'added to' : 'removed from';
+      const icon = isNewPick ? 'i-ph-plus-bold' : 'i-ph-minus-bold';
+      const toastMessage = `${player.player_name} has been ${playerPickedMessage} your team`;
+      if (isNewPick) {
         this.teamPicks.push(player);
       } else {
         this.teamPicks.splice(matchingIndex, 1);
       }
+      toast.add({ title: toastMessage, icon, timeout: 3000 });
     },
   },
 });
