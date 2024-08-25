@@ -14,7 +14,7 @@ const injuryMapping = {
 </script>
 
 <template>
-  <div class="flex gap-4 items-center group/player-cell">
+  <div class="flex gap-4 items-center">
     <UTooltip
       :text="
         player.injury &&
@@ -28,10 +28,10 @@ const injuryMapping = {
         :class="[player?.injury?.status_short
                     ? injuryMapping[player?.injury?.status_short as keyof typeof injuryMapping]
                     : 'ring-slate-200 dark:ring-slate-600']"
-        class="ring-2 relative cursor-pointer"
+        class="ring-2 relative cursor-pointer group/avatar"
       >
         <span
-          class="absolute group-hover/player-cell:opacity-100 opacity-0 bg-white dark:bg-slate-800 w-full h-full rounded-full transition-all flex items-center justify-center group/pick hover:bg-blue-50 dark:hover:bg-slate-700"
+          class="absolute group-hover/avatar:opacity-100 opacity-0 bg-white dark:bg-slate-800 w-full h-full rounded-full transition-all flex items-center justify-center hover:bg-blue-50 dark:hover:bg-slate-700"
           @click.stop="emit('avatar-click', player)"
         >
           <UIcon
@@ -40,7 +40,7 @@ const injuryMapping = {
                 ? 'i-ph-minus-bold'
                 : 'i-ph-plus-bold'
             "
-            class="w-4 h-4 group-hover/player-cell:scale-100 scale-0 transition-transform delay-100 text-blue-800 dark:text-blue-400 group-hover/pick:scale-125"
+            class="w-4 h-4 group-hover/avatar:scale-100 scale-0 transition-transform delay-100 text-blue-800 dark:text-blue-400"
           />
         </span>
       </UAvatar>
