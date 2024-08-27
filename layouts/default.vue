@@ -30,13 +30,19 @@ const isDark = computed({
             color="gray"
             variant="ghost"
             aria-label="Theme"
-            @click="isDark = !isDark" />
+            @click="isDark = !isDark"
+          />
           <template #fallback>
             <div class="w-8 h-8" />
           </template>
         </ClientOnly>
-        <UButton color="gray" aria-label="Theme" @click="toggleSlideover">
-          My Team
+        <UButton
+          color="white"
+          aria-label="Theme"
+          icon="i-ph-users-three-bold"
+          @click="toggleSlideover"
+        >
+          Team
         </UButton>
       </div>
     </section>
