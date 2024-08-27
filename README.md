@@ -2,6 +2,8 @@
 
 https://draughtsheets.netlify.app/
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9054d569-d4fc-4a12-9ee7-0fc6af861379/deploy-status)](https://app.netlify.com/sites/draughtsheets/deploys)
+
 Inspired by the legend, BeerSheets - DraughtSheets is a web-app that creates a ranking model for fantasy football snake drafts by calculating each player's value over replacement (VOR). The model is designed for standard, half-PPR, and PPR formats, with data sourced from FantasyPros. It focuses on identifying potential bargains by comparing VOR rankings with Average Draft Position (ADP) data.
 
 To calculate a player's value over replacement (VOR), identify a "replacement player" at each position whose projected points reflect the average positional value. Then, subtract this replacement value from each player's projected points within the same position. The result is the player's VOR, indicating how much better they are compared to the typical replacement player.
@@ -52,14 +54,3 @@ pnpm run preview
 - https://www.fantasypros.com/2024/05/fantasy-football-draft-strategy-value-based-drafting/
 - https://www.footballguys.com/article/2019-value-based-drafting
 - https://www.fantasyfootballdatapros.com/blog/intermediate/5
-
-### TODO:
-- [ ] Ability to select own draft picks
-- [ ] Ability to remove drafted players
-- [ ] Defence Sheet - Show upcoming opponents
-- [ ] Calculate Sleeper Score by comparing value rank vs adp rank
-- [x] Ability to input league settings and calculate fantasy point projections based on projected stats
-- [ ] Apply settings to URL params
-- [ ] CRON to pull FP data
-- [ ] Store data on database
-- [ ] Move data manipulation/calculations to server
