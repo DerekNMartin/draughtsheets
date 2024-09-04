@@ -12,6 +12,8 @@ The value of a player is determined not by the number of points they score. Thei
 
 My main goal for this project was to learn and try out Nuxt, as well as learn more about value-based drafting as the 2024 fantasy football season is just starting.
 
+![image](https://github.com/user-attachments/assets/66818694-facb-4cd7-b141-32d871e2407c)
+
 ## Setup
 
 Make sure to install the dependencies:
