@@ -27,7 +27,8 @@ const computedLabel = computed(() => {
   <div class="AppSelect">
     <label
       v-if="label"
-      class="text-xs font-semibold light:text-slate-600 dark:text-white">
+      class="text-xs font-semibold light:text-slate-600 dark:text-white"
+    >
       {{ label }}
     </label>
     <USelectMenu
@@ -36,18 +37,21 @@ const computedLabel = computed(() => {
       class="h-full"
       :options
       :value-attribute
-      :option-attribute="labelAttribute">
+      :option-attribute="labelAttribute"
+    >
       <UButton
         color="white"
         class="flex-1 justify-between h-10"
         :class="{
           'ring-2 ring-primary-500 dark:ring-primary-400': open,
-        }">
+        }"
+      >
         {{ computedLabel }}
         <UIcon
           name="i-heroicons-chevron-down-20-solid"
           class="w-5 h-5 transition-transform"
-          :class="{ 'transform rotate-180': open }" />
+          :class="{ 'transform rotate-180': open }"
+        />
       </UButton>
     </USelectMenu>
   </div>

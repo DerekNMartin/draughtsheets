@@ -50,7 +50,9 @@ export const usePlayersStore = defineStore('players', {
         const rankingData = await $fetch('/api/rankings', {
           query: {
             position: 'all',
+            type: 'adp',
             scoring: scoringType,
+            week: '0',
           },
         });
         if (rankingData.players) {

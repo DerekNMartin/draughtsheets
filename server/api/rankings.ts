@@ -1,33 +1,39 @@
 import type { H3Event } from 'h3';
 
 interface RankingPlayer {
-  player_id: number;
-  player_name: string;
-  sportsdata_id: string;
-  player_team_id: string;
-  player_position_id: string;
-  player_positions: string;
-  player_short_name: string;
-  player_eligibility: string;
-  player_yahoo_positions: string;
-  player_page_url: string;
-  player_filename: string;
-  player_square_image_url: string;
-  player_image_url: string;
-  player_yahoo_id: string;
   cbs_player_id: string;
+  note: string;
   player_bye_week: string;
+  player_ecr_delta: string;
+  player_eligibility: string;
+  player_filename: string;
+  player_id: number;
+  player_image_url: string;
+  player_name: string;
+  player_opponent: string;
+  player_opponent_id: string;
   player_owned_avg: number;
   player_owned_espn: number;
   player_owned_yahoo: number;
-  player_ecr_delta: number;
-  rank_ecr: number;
-  rank_min: string;
-  rank_max: string;
-  rank_ave: string;
-  rank_std: string;
+  player_page_url: string;
+  player_position_id: string;
+  player_positions: string;
+  player_short_name: string;
+  player_square_image_url: string;
+  player_team_id: string;
+  player_yahoo_id: string;
+  player_yahoo_positions: string;
   pos_rank: string;
-  tier: number;
+  r2p_pts: string;
+  rank_ave: string;
+  rank_ecr: number;
+  rank_max: string;
+  rank_min: string;
+  rank_std: string;
+  recommendation: string;
+  sportsdata_id: string;
+  start_sit_grade: string;
+  tag: string;
 }
 
 interface FpRankingsResponse {
@@ -54,26 +60,25 @@ interface FpRankingsResponse {
 
 function handleQueryParams(event: H3Event) {
   const defaultParams = {
-    type: 'adp',
     scoring: 'STD',
     position: 'ALL',
     week: '0',
-    exports: 'available',
-    sport: 'nfl',
   };
   const params = getQuery(event);
-
   return { ...defaultParams, ...params };
 }
 
-export default defineEventHandler(async (event) => {
-  return await $fetch<FpRankingsResponse>(
-    'https://api.fantasypros.com/v2/json/nfl/2024/consensus-rankings',
-    {
-      headers: {
-        'x-api-key': 'zjxN52G3lP4fORpHRftGI2mTU8cTwxVNvkjByM3j',
-      },
-      params: handleQueryParams(event),
-    }
-  );
-});
+export default defineCachedEventHandler(
+  async (event) => {
+    return await $fetch<FpRankingsResponse>(
+      'https://api.fantasypros.com/v2/json/nfl/2024/consensus-rankings',
+      {
+        headers: {
+          'x-api-key': 'zjxN52G3lP4fORpHRftGI2mTU8cTwxVNvkjByM3j',
+        },
+        params: handleQueryParams(event),
+      }
+    );
+  },
+  { maxAge: 30 * 60 /* 30 minutes */ }
+);

@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.5.3",
+    "echarts": "^5.5.1",
+    "ml-kmeans": "^6.0.0",
     "nuxt": "^3.12.4",
     "nuxt-gtag": "^2.1.0",
-    "vue": "latest"
+    "vue": "latest",
+    "vue-echarts": "^7.0.3"
   },
   "devDependencies": {
     "@headlessui/tailwindcss": "^0.2.1",

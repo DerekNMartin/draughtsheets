@@ -150,11 +150,13 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
       v-model:scoring-type="scoringType"
       v-model:league-size="leagueSize"
       v-model:pick-number="pickNumber"
-      v-model:points-mapping="pointsMapping" />
+      v-model:points-mapping="pointsMapping"
+    />
     <TableFilter
       v-model:search="searchValue"
       v-model:team="teamSelected"
-      :team-options="teamSelectOptions" />
+      :team-options="teamSelectOptions"
+    />
     <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
         position="QB"
@@ -163,7 +165,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="RB"
         :loading="isFetchingPlayerData"
@@ -171,7 +174,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="WR"
         :loading="isFetchingPlayerData"
@@ -179,7 +183,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="TE"
         :loading="isFetchingPlayerData"
@@ -187,7 +192,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
     </section>
     <TeamSlideover v-model="isSlideoverOpen" />
   </div>
