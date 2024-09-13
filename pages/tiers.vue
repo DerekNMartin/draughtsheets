@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { kmeans } from 'ml-kmeans';
+import dayjs from 'dayjs';
 
-/*
- * TODO:
- * Automatically get NFL week number
- */
 const positionOptions = ['QB', 'WR', 'RB', 'TE', 'DST', 'K'] as const;
 type Position = (typeof positionOptions)[number];
 const positionSelected = ref(positionOptions[0]);
@@ -27,11 +24,17 @@ const positionMapping = computed(() => {
   return playerMap[positionSelected.value];
 });
 
+function getNFLWeek() {
+  const startDate = dayjs('September 6, 2024');
+  const today = dayjs();
+  return Math.ceil(today.diff(startDate, 'week', true));
+}
+
 const rankingQuery = computed(() => {
   return {
     position: positionSelected.value,
     scoring: scoringSelected.value,
-    week: '2',
+    week: getNFLWeek(),
     limit: positionMapping.value.numOfPlayers,
   };
 });
