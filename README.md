@@ -12,7 +12,12 @@ The value of a player is determined not by the number of points they score. Thei
 
 My main goal for this project was to learn and try out Nuxt, as well as learn more about value-based drafting as the 2024 fantasy football season is just starting.
 
+### Player Draft Sheets
 ![image](https://github.com/user-attachments/assets/66818694-facb-4cd7-b141-32d871e2407c)
+
+### Player Tiers
+Players are organized into tiers using [k-means clustering](https://en.wikipedia.org/wiki/K-means_clustering) and plotted on a scatter-chart by expert rankings. The x-axis displays the players' average rank, while the y-axis shows the expert consensus rank. This visualization allows for detailed comparison and analysis of player performance, helping you make data-driven decisions for your weekly lineup.
+![image](https://github.com/user-attachments/assets/3b05156e-641d-4898-b50b-0dd7e6870f27)
 
 ## Setup
 
