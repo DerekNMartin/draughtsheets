@@ -15,7 +15,7 @@ const isDark = computed({
 </script>
 
 <template>
-  <main class="grid grid-rows-[auto,1fr,auto] gap-6 flex-col p-6 h-screen">
+  <main class="grid grid-rows-[auto,1fr,auto] gap-6 flex-col p-6 min-h-screen">
     <header class="flex items-center justify-between">
       <router-link to="/" class="flex items-center gap-1">
         <UIcon name="i-ph-beer-stein-bold" class="h-6 w-6 scale-x-[-1]" />
@@ -46,7 +46,7 @@ const isDark = computed({
     </header>
     <slot />
     <footer
-      class="flex justify-between p-6 pb-0 border-t border-solid border-gray-100 items-center"
+      class="grid sm:grid-cols-2 grid-cols-1 pt-6 border-t border-solid border-gray-100 items-center"
     >
       <p class="text-sm">
         Crafted by
@@ -57,7 +57,7 @@ const isDark = computed({
           Derek Martin
         </a>
       </p>
-      <p class="text-sm">
+      <p class="text-sm sm:text-end">
         Data provided by
         <a
           class="text-blue-500 hover:underline"
