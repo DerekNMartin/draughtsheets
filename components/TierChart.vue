@@ -39,10 +39,10 @@ function renderItem(
   };
   const baseDimIdx = 1;
   const otherDimIdx = 1 - baseDimIdx;
-  const encode = params.encode;
-  const ecr = Number(api.value(encode.x[0]));
-  const avg = Number(api.value(encode.x[1]));
-  const std = Number(api.value(encode.x[2]));
+  const name = api.value(0) as string;
+  const ecr = Number(api.value(1));
+  const avg = Number(api.value(2));
+  const std = Number(api.value(3));
   const minValue = avg - std / 2;
   const maxValue = avg + std / 2;
   const baseValue = ecr;
@@ -53,11 +53,11 @@ function renderItem(
   param[otherDimIdx] = minValue;
   const lowPoint = api.coord(param);
   const halfWidth = 2;
-  const style = api.style({
+  const style = {
     stroke: api.visual('color'),
     lineWidth: 3,
     opacity: 0.3,
-  });
+  };
   group.children.push(
     {
       type: 'line',
@@ -80,10 +80,6 @@ function renderItem(
         lowPoint[otherDimIdx]
       ),
       style: style,
-      textContent: {
-        type: 'text',
-        invisible: true,
-      },
     },
     {
       type: 'line',
@@ -95,10 +91,12 @@ function renderItem(
         lowPoint[otherDimIdx]
       ),
       style: style,
-      textContent: {
-        type: 'text',
-        invisible: true,
-      },
+    },
+    {
+      type: 'text',
+      x: highPoint[0] + 6,
+      y: highPoint[1] - 6,
+      style: { text: name, fill: api.visual('color') as string },
     }
   );
   function makeShape(
@@ -124,7 +122,14 @@ const chartData = computed(() => {
   }));
 });
 
-const dimensions = [{ name: 'name', type: 'ordinal' }, 'rank', 'avg', 'std'];
+const dimensions = [
+  { name: 'name', type: 'ordinal' },
+  { name: 'rank', displayName: 'Rank', type: 'number' },
+  'avg',
+  'std',
+  'tier',
+  { name: 'grade', displayName: 'Start Grade', type: 'ordinal' },
+];
 
 const colours = computed(() => {
   return [
@@ -208,7 +213,7 @@ const option = computed(() => {
         encode: {
           x: 'avg',
           y: 'rank',
-          tooltip: ['rank'],
+          tooltip: ['rank', 'grade'],
           itemName: 0,
         },
         itemStyle: {
@@ -227,15 +232,13 @@ const option = computed(() => {
         renderItem: renderItem,
         dimensions: dimensions,
         encode: {
-          x: ['rank', 'avg', 'std'],
-          label: 'name',
+          x: ['avg'],
+          y: ['avg'],
+          tooltip: ['rank', 'grade'],
+          itemName: 0,
         },
         tooltip: {
-          show: false,
-        },
-        label: {
           show: true,
-          position: 'right',
         },
       },
     ],

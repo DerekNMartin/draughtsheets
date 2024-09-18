@@ -24,17 +24,20 @@ const positionMapping = computed(() => {
   return playerMap[positionSelected.value];
 });
 
-function getNFLWeek() {
-  const startDate = dayjs('September 6, 2024');
+const nflWeek = computed(() => {
+  const startDate = dayjs('September 2, 2024');
   const today = dayjs();
   return Math.ceil(today.diff(startDate, 'week', true));
-}
+});
+
+const weekOptions = Array.from({ length: nflWeek.value + 1 }, (_, i) => i);
+const weekSelected = ref(nflWeek.value);
 
 const rankingQuery = computed(() => {
   return {
     position: positionSelected.value,
     scoring: scoringSelected.value,
-    week: getNFLWeek(),
+    week: weekSelected.value,
     limit: positionMapping.value.numOfPlayers,
   };
 });
@@ -58,6 +61,7 @@ const chartData = computed(() => {
       player.rank_ave,
       player.rank_std,
       tiers[index],
+      player.start_sit_grade,
     ];
   });
 });
@@ -99,7 +103,7 @@ const tierList = computed(() => {
     </section>
     <UCard>
       <template #header>
-        <section class="flex gap-6">
+        <section class="grid grid-flow-col gap-6">
           <AppSelect
             v-model="positionSelected"
             :options="positionOptions"
@@ -110,6 +114,12 @@ const tierList = computed(() => {
             size="sm"
             :options="scoringOptions"
             label="Scoring"
+          />
+          <AppSelect
+            v-model="weekSelected"
+            size="sm"
+            :options="weekOptions"
+            label="Week"
           />
         </section>
       </template>
