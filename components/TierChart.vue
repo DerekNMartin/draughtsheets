@@ -157,12 +157,13 @@ const option = computed(() => {
         id: 'dataZoomX',
         type: 'inside',
         xAxisIndex: [0],
-        filterMode: 'weakFilter',
+        minSpan: 80,
       },
       {
         id: 'dataZoomY',
         type: 'inside',
         yAxisIndex: [0],
+        minSpan: 30,
       },
     ],
     xAxis: {
