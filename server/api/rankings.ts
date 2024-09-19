@@ -74,7 +74,7 @@ export default defineCachedEventHandler(
       'https://api.fantasypros.com/v2/json/nfl/2024/consensus-rankings',
       {
         headers: {
-          'x-api-key': 'zjxN52G3lP4fORpHRftGI2mTU8cTwxVNvkjByM3j',
+          'x-api-key': process.env.FFP_API_KEY || '',
         },
         params: handleQueryParams(event),
       }
