@@ -157,13 +157,13 @@ const option = computed(() => {
         id: 'dataZoomX',
         type: 'inside',
         xAxisIndex: [0],
-        minSpan: 80,
+        minSpan: 100,
       },
       {
         id: 'dataZoomY',
         type: 'inside',
         yAxisIndex: [0],
-        minSpan: 30,
+        minSpan: 50,
       },
     ],
     xAxis: {
@@ -171,7 +171,7 @@ const option = computed(() => {
       name: 'Average Expert Rank',
       nameLocation: 'middle',
       nameGap: 25,
-      boundaryGap: [0, 0.02],
+      boundaryGap: ['0', '10%'],
       axisLine: {
         show: false,
       },
@@ -188,7 +188,7 @@ const option = computed(() => {
       nameLocation: 'middle',
       nameGap: 20,
       inverse: true,
-      boundaryGap: [0, 0.01],
+      boundaryGap: ['0', '1%'],
       axisLine: {
         show: false,
       },
@@ -211,6 +211,7 @@ const option = computed(() => {
         name: 'ECR',
         data: chartData.value,
         dimensions: dimensions,
+        symbolSize: 7,
         encode: {
           x: 'avg',
           y: 'rank',

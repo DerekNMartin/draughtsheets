@@ -105,35 +105,35 @@ const tierList = computed(() => {
         and decide your starters.
       </p>
     </section>
-    <UCard>
-      <template #header>
-        <section class="flex flex-col gap-4">
-          <div class="grid grid-flow-col gap-6">
-            <AppSelect
-              v-model="positionSelected"
-              :options="positionOptions"
-              label="Position"
-            />
-            <AppSelect
-              v-model="scoringSelected"
-              size="sm"
-              :options="scoringOptions"
-              label="Scoring"
-            />
-            <AppSelect
-              v-model="weekSelected"
-              size="sm"
-              :options="weekOptions"
-              label="Week"
-            />
-          </div>
-          <p class="text-xs self-end text-gray-500">
-            Last Updated: {{ lastUpdatedTime }}
-          </p>
-        </section>
-      </template>
-      <TierChart :data="chartData" />
-      <template #footer>
+    <div class="flex flex-col gap-6">
+      <div class="border-b border-solid border-neutral-200 pb-6">
+        <div class="grid grid-flow-col gap-6">
+          <AppSelect
+            v-model="positionSelected"
+            :options="positionOptions"
+            label="Position"
+          />
+          <AppSelect
+            v-model="scoringSelected"
+            size="sm"
+            :options="scoringOptions"
+            label="Scoring"
+          />
+          <AppSelect
+            v-model="weekSelected"
+            size="sm"
+            :options="weekOptions"
+            label="Week"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col border-b border-solid border-neutral-200 pb-6">
+        <p class="text-xs self-end text-gray-500">
+          Last Updated: {{ lastUpdatedTime }}
+        </p>
+        <TierChart :data="chartData" />
+      </div>
+      <div>
         <ul>
           <li
             v-for="(tier, index) in tierList"
@@ -146,7 +146,7 @@ const tierList = computed(() => {
             <span>{{ tier?.join(', ') }}</span>
           </li>
         </ul>
-      </template>
-    </UCard>
+      </div>
+    </div>
   </div>
 </template>
