@@ -170,7 +170,7 @@ const option = computed(() => {
       type: 'value',
       name: 'Average Expert Rank',
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: 25,
       boundaryGap: [0, 0.02],
       axisLine: {
         show: false,
@@ -186,7 +186,7 @@ const option = computed(() => {
       type: 'value',
       name: 'Expert Consensus Rank',
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: 20,
       inverse: true,
       boundaryGap: [0, 0.01],
       axisLine: {
@@ -201,9 +201,9 @@ const option = computed(() => {
     },
     grid: {
       top: 10,
-      bottom: 45,
+      bottom: 40,
       right: 10,
-      left: 45,
+      left: 35,
     },
     series: [
       {
@@ -247,12 +247,13 @@ const option = computed(() => {
 });
 
 const echartsInstance = ref();
-
 window.addEventListener('resize', () => {
   echartsInstance.value?.resize();
 });
+
+defineExpose({ chartColours: colours });
 </script>
 
 <template>
-  <v-chart ref="echartsInstance" class="h-[500px]" :option="option" />
+  <v-chart ref="echartsInstance" class="h-[750px]" :option="option" />
 </template>
