@@ -41,11 +41,15 @@ const rankingQuery = computed(() => {
     limit: positionMapping.value.numOfPlayers,
   };
 });
-const { data: players } = useFetch('/api/rankings', {
+const { data: playerRankData } = useFetch('/api/rankings', {
   query: rankingQuery,
-  transform(input) {
-    return input.players;
-  },
+});
+const players = computed(() => playerRankData?.value?.players);
+const lastUpdatedTime = computed(() => {
+  const lastUpdatedTs = playerRankData?.value?.last_updated_ts;
+  return lastUpdatedTs
+    ? dayjs.unix(lastUpdatedTs).format('ddd MMM DD h:mm A')
+    : '';
 });
 
 const chartData = computed(() => {
@@ -103,31 +107,45 @@ const tierList = computed(() => {
     </section>
     <UCard>
       <template #header>
-        <section class="grid grid-flow-col gap-6">
-          <AppSelect
-            v-model="positionSelected"
-            :options="positionOptions"
-            label="Position"
-          />
-          <AppSelect
-            v-model="scoringSelected"
-            size="sm"
-            :options="scoringOptions"
-            label="Scoring"
-          />
-          <AppSelect
-            v-model="weekSelected"
-            size="sm"
-            :options="weekOptions"
-            label="Week"
-          />
+        <section class="flex flex-col gap-4">
+          <div class="grid grid-flow-col gap-6">
+            <AppSelect
+              v-model="positionSelected"
+              :options="positionOptions"
+              label="Position"
+            />
+            <AppSelect
+              v-model="scoringSelected"
+              size="sm"
+              :options="scoringOptions"
+              label="Scoring"
+            />
+            <AppSelect
+              v-model="weekSelected"
+              size="sm"
+              :options="weekOptions"
+              label="Week"
+            />
+          </div>
+          <p class="text-xs self-end text-gray-500">
+            Last Updated: {{ lastUpdatedTime }}
+          </p>
         </section>
       </template>
       <TierChart :data="chartData" />
       <template #footer>
-        <p v-for="(tier, index) in tierList" :key="index">
-          Tier {{ index + 1 }}: {{ tier?.join(', ') }}
-        </p>
+        <ul>
+          <li
+            v-for="(tier, index) in tierList"
+            :key="index"
+            class="flex gap-2 py-2 first:pt-0 last:pb-0 last:border-none items-center border-b border-solid border-gray-200"
+          >
+            <span class="text-sm text-gray-500 min-w-fit"
+              >Tier {{ index + 1 }}</span
+            >
+            <span>{{ tier?.join(', ') }}</span>
+          </li>
+        </ul>
       </template>
     </UCard>
   </div>
