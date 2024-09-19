@@ -26,7 +26,7 @@ const positionMapping = computed(() => {
     WR: { numOfPlayers: 60, numOfTiers: 12 },
     RB: { numOfPlayers: 40, numOfTiers: 9 },
     TE: { numOfPlayers: 24, numOfTiers: 8 },
-    FLX: { numOfPlayers: 95, numOfTiers: 14 },
+    FLX: { numOfPlayers: 100, numOfTiers: 15 },
     DST: { numOfPlayers: 20, numOfTiers: 5 },
     K: { numOfPlayers: 20, numOfTiers: 6 },
   };
@@ -53,10 +53,7 @@ const rankingQuery = computed(() => {
 const { data: playerRankData } = useFetch('/api/rankings', {
   query: rankingQuery,
 });
-const players = computed(() => {
-  const data = playerRankData?.value?.players;
-  return positionSelected.value === 'FLX' ? data?.slice(20, data.length) : data;
-});
+const players = computed(() => playerRankData?.value?.players);
 const lastUpdatedTime = computed(() => {
   const lastUpdatedTs = playerRankData?.value?.last_updated_ts;
   return lastUpdatedTs

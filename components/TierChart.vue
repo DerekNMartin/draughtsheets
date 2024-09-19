@@ -165,7 +165,7 @@ const option = computed(() => {
         id: 'dataZoomY',
         type: 'inside',
         yAxisIndex: [0],
-        minSpan: 50,
+        minSpan: 40,
       },
     ],
     xAxis: {
