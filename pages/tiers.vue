@@ -2,9 +2,17 @@
 import { kmeans } from 'ml-kmeans';
 import dayjs from 'dayjs';
 
-const positionOptions = ['QB', 'WR', 'RB', 'TE', 'DST', 'K'] as const;
-type Position = (typeof positionOptions)[number];
-const positionSelected = ref(positionOptions[0]);
+type Position = 'QB' | 'WR' | 'RB' | 'TE' | 'DST' | 'K' | 'FLX';
+const positionOptions: { value: Position; label: string }[] = [
+  { value: 'QB', label: 'QB' },
+  { value: 'WR', label: 'WR' },
+  { value: 'RB', label: 'RB' },
+  { value: 'TE', label: 'TE' },
+  { value: 'DST', label: 'DST' },
+  { value: 'K', label: 'K' },
+  { value: 'FLX', label: 'FLEX' },
+];
+const positionSelected = ref<Position>(positionOptions[0].value);
 
 const scoringOptions = ['STD', 'PPR', 'HALF'];
 const scoringSelected = ref(scoringOptions[0]);
@@ -18,6 +26,7 @@ const positionMapping = computed(() => {
     WR: { numOfPlayers: 60, numOfTiers: 12 },
     RB: { numOfPlayers: 40, numOfTiers: 9 },
     TE: { numOfPlayers: 24, numOfTiers: 8 },
+    FLX: { numOfPlayers: 95, numOfTiers: 14 },
     DST: { numOfPlayers: 20, numOfTiers: 5 },
     K: { numOfPlayers: 20, numOfTiers: 6 },
   };
@@ -44,7 +53,10 @@ const rankingQuery = computed(() => {
 const { data: playerRankData } = useFetch('/api/rankings', {
   query: rankingQuery,
 });
-const players = computed(() => playerRankData?.value?.players);
+const players = computed(() => {
+  const data = playerRankData?.value?.players;
+  return positionSelected.value === 'FLX' ? data?.slice(20, data.length) : data;
+});
 const lastUpdatedTime = computed(() => {
   const lastUpdatedTs = playerRankData?.value?.last_updated_ts;
   return lastUpdatedTs
@@ -111,6 +123,8 @@ const tierList = computed(() => {
           <AppSelect
             v-model="positionSelected"
             :options="positionOptions"
+            label-attribute="label"
+            value-attribute="value"
             label="Position"
           />
           <AppSelect
