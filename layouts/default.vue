@@ -46,8 +46,16 @@ const isDark = computed({
     </header>
     <slot />
     <footer
-      class="grid sm:grid-cols-2 grid-cols-1 pt-6 border-t border-solid border-gray-100 items-center"
+      class="flex sm:flex-row flex-col pt-6 border-t border-solid border-gray-100 sm:items-center justify-between gap-4"
     >
+      <a
+        href="https://www.buymeacoffee.com/derekmartin"
+        target="_blank"
+        class="p-2 bg-yellow-400 rounded-md w-fit font-bold text-slate-800 hover:bg-yellow-300 transition-colors group wiggle-link flex gap-1 items-center"
+      >
+        <span class="wiggle block">🍺</span>
+        <span class="text-xs ml-1 mt-0.5">CHEERS!</span>
+      </a>
       <p class="text-sm">
         Crafted by
         <a
@@ -69,3 +77,22 @@ const isDark = computed({
     </footer>
   </main>
 </template>
+
+<style>
+.wiggle-link:hover .wiggle {
+  animation-play-state: running;
+}
+.wiggle {
+  animation: wiggle 400ms linear infinite alternate;
+  animation-play-state: paused;
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+</style>
