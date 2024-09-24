@@ -8,6 +8,7 @@ import type {
 
 import colors from 'tailwindcss/colors';
 
+import { useScreenSize } from '@/composables/useScreenSize';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import {
@@ -28,6 +29,8 @@ use([
 ]);
 
 const props = defineProps<{ data?: (string | number)[][] }>();
+
+const { isSmScreen } = useScreenSize();
 
 function renderItem(
   params: CustomSeriesRenderItemParams,
@@ -152,6 +155,7 @@ const colours = computed(() => {
 });
 
 const option = computed(() => {
+  const boundaryGapMax = isSmScreen.value ? '50%' : '10%';
   return {
     tooltip: {},
     dataZoom: [
@@ -174,7 +178,7 @@ const option = computed(() => {
       nameLocation: 'middle',
       nameGap: 25,
       scale: true,
-      boundaryGap: ['0', '10%'],
+      boundaryGap: ['0', boundaryGapMax],
       axisLine: {
         show: false,
       },
@@ -204,10 +208,11 @@ const option = computed(() => {
       },
     },
     grid: {
+      containLabel: true,
       top: 10,
-      bottom: 40,
+      bottom: 20,
       right: 10,
-      left: 35,
+      left: 10,
     },
     series: [
       {
