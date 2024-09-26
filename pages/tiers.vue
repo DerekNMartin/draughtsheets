@@ -103,6 +103,11 @@ const tierList = computed(() => {
     { currentTier: 0, prevCluster: chartData.value[0][4], tiers: [] }
   ).tiers;
 });
+
+watch([positionSelected, scoringSelected, weekSelected], (newValue) => {
+  const [position, scoring, week] = newValue;
+  useTrackEvent('tier_settings_changed', { position, scoring, week });
+});
 </script>
 
 <template>
