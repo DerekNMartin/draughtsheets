@@ -2,13 +2,17 @@
 export type SelectOption = { value: string | number; label: string };
 
 interface AppSelectProps {
-  options: SelectOption[] | string[] | number[];
+  options: SelectOption[] | string[];
   label?: string;
   labelAttribute?: string;
   valueAttribute?: string;
 }
 
-const props = defineProps<AppSelectProps>();
+const props = withDefaults(defineProps<AppSelectProps>(), {
+  label: '',
+  labelAttribute: 'label',
+  valueAttribute: 'value',
+});
 const selected = defineModel<SelectOption | string | number>();
 
 const computedLabel = computed(() => {
