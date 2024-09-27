@@ -2,7 +2,8 @@
 import { kmeans } from 'ml-kmeans';
 import dayjs from 'dayjs';
 
-type Position = 'QB' | 'WR' | 'RB' | 'TE' | 'DST' | 'K' | 'FLX';
+const validPositions = ['QB', 'WR', 'RB', 'TE', 'DST', 'K', 'FLX'] as const;
+type Position = (typeof validPositions)[number];
 const positionOptions: { value: Position; label: string }[] = [
   { value: 'QB', label: 'QB' },
   { value: 'WR', label: 'WR' },
@@ -14,8 +15,14 @@ const positionOptions: { value: Position; label: string }[] = [
 ];
 const positionSelected = ref<Position>(positionOptions[0].value);
 
-const scoringOptions = ['STD', 'PPR', 'HALF'];
-const scoringSelected = ref(scoringOptions[0]);
+const validScoringTypes = ['STD', 'PPR', 'HALF'] as const;
+type ScoringType = (typeof validScoringTypes)[number];
+const scoringOptions: { value: ScoringType; label: string }[] = [
+  { value: 'STD', label: 'Standard' },
+  { value: 'PPR', label: 'PPR' },
+  { value: 'HALF', label: 'Half PPR' },
+];
+const scoringSelected = ref<ScoringType>(scoringOptions[0].value);
 
 const positionMapping = computed(() => {
   const playerMap: Record<
@@ -36,10 +43,12 @@ const positionMapping = computed(() => {
 const nflWeek = computed(() => {
   const startDate = dayjs('September 2, 2024');
   const today = dayjs();
-  return Math.ceil(today.diff(startDate, 'week', true));
+  return Math.ceil(today.diff(startDate, 'week', true)).toString();
 });
 
-const weekOptions = Array.from({ length: nflWeek.value + 1 }, (_, i) => i);
+const weekOptions = Array.from({ length: Number(nflWeek.value) + 1 }, (_, i) =>
+  i.toString()
+);
 const weekSelected = ref(nflWeek.value);
 
 const rankingQuery = computed(() => {
@@ -104,10 +113,31 @@ const tierList = computed(() => {
   ).tiers;
 });
 
+const route = useRoute();
+const router = useRouter();
 watch([positionSelected, scoringSelected, weekSelected], (newValue) => {
   const [position, scoring, week] = newValue;
   useTrackEvent('tier_settings_changed', { position, scoring, week });
+  router.replace({ path: route.path, query: { position, scoring } });
 });
+watch(
+  () => route.query,
+  (newQuery, oldQuery) => {
+    if (newQuery === oldQuery) return;
+    const { position, scoring } = newQuery;
+    if (
+      typeof position === 'string' &&
+      validPositions.includes(position as Position)
+    )
+      positionSelected.value = position as Position;
+    if (
+      typeof scoring === 'string' &&
+      validScoringTypes.includes(scoring as ScoringType)
+    )
+      scoringSelected.value = scoring as ScoringType;
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -125,8 +155,6 @@ watch([positionSelected, scoringSelected, weekSelected], (newValue) => {
           <AppSelect
             v-model="positionSelected"
             :options="positionOptions"
-            label-attribute="label"
-            value-attribute="value"
             label="Position"
           />
           <AppSelect
