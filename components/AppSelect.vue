@@ -8,11 +8,7 @@ interface AppSelectProps {
   valueAttribute?: string;
 }
 
-const props = withDefaults(defineProps<AppSelectProps>(), {
-  label: '',
-  labelAttribute: 'label',
-  valueAttribute: 'value',
-});
+const props = defineProps<AppSelectProps>();
 const selected = defineModel<SelectOption | string | number>();
 
 const computedLabel = computed(() => {

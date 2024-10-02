@@ -155,12 +155,16 @@ watch(
           <AppSelect
             v-model="positionSelected"
             :options="positionOptions"
+            label-attribute="label"
+            value-attribute="value"
             label="Position"
           />
           <AppSelect
             v-model="scoringSelected"
             size="sm"
             :options="scoringOptions"
+            label-attribute="label"
+            value-attribute="value"
             label="Scoring"
           />
           <AppSelect
