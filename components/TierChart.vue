@@ -177,7 +177,6 @@ const option = computed(() => {
       name: 'Average Expert Rank',
       nameLocation: 'middle',
       nameGap: 25,
-      scale: true,
       boundaryGap: ['0', boundaryGapMax],
       axisLine: {
         show: false,
@@ -194,7 +193,6 @@ const option = computed(() => {
       name: 'Expert Consensus Rank',
       nameLocation: 'middle',
       nameGap: 20,
-      scale: true,
       inverse: true,
       boundaryGap: ['0', '1%'],
       axisLine: {
