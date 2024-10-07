@@ -12,6 +12,11 @@ const isDark = computed({
     colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
   },
 });
+
+function handleFooterLink(event: MouseEvent) {
+  const { href, innerText } = event?.target as HTMLLinkElement;
+  useTrackEvent('footer_link_clicked', { href, innerText });
+}
 </script>
 
 <template>
@@ -52,15 +57,17 @@ const isDark = computed({
         href="https://www.buymeacoffee.com/derekmartin"
         target="_blank"
         class="p-2 bg-yellow-400 rounded-md w-fit font-bold text-slate-800 hover:bg-yellow-300 transition-colors group wiggle-link flex gap-1 items-center"
+        @click="handleFooterLink"
       >
         <span class="wiggle block">🍺</span>
-        <span class="text-xs ml-1 mt-0.5">CHEERS!</span>
+        <span class="text-xs ml-1 mt-0.5">Buy me a beer!</span>
       </a>
       <p class="text-sm">
         Crafted by
         <a
           class="text-blue-500 hover:underline"
           href="https://github.com/DerekNMartin"
+          @click="handleFooterLink"
         >
           Derek Martin
         </a>
@@ -70,6 +77,7 @@ const isDark = computed({
         <a
           class="text-blue-500 hover:underline"
           href="https://www.fantasypros.com/nfl/"
+          @click="handleFooterLink"
         >
           FantasyPros
         </a>
