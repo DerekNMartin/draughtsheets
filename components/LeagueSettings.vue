@@ -2,11 +2,11 @@
 import type { SelectOption } from '@/components/AppSelect.vue';
 import { formatOrdinals } from '@/utils/numbers';
 import { calculateRoundPick } from '@/utils/strings.js';
-import useSlideover from '@/composables/useSlideover';
+import useSlideSheet from '@/composables/useSlideSheet';
 
 type PointsMapping = Record<string, Record<string, number>>;
 
-const { toggleSlideover } = useSlideover;
+const { toggleSlideSheet } = useSlideSheet;
 
 const scoringSelected = defineModel<string>('scoringType');
 const scoringSelectOptions: SelectOption[] = [
@@ -47,8 +47,7 @@ const draftPicks = computed(() => {
   const numOfTeams = Number(leagueSelected?.value);
   const pickPosition = Number(pickSelected?.value);
   for (let round = 1; round <= rounds; round++) {
-    const pick =
-      round % 2 === 0 ? numOfTeams - (pickPosition - 1) : pickPosition;
+    const pick = round % 2 === 0 ? numOfTeams - (pickPosition - 1) : pickPosition;
     const pickNumber = (round - 1) * numOfTeams + pick;
     myPicks.push(pickNumber);
   }
@@ -73,7 +72,7 @@ defineExpose({ draftPicks });
           color="white"
           aria-label="Theme"
           icon="i-ph-users-three-bold"
-          @click="toggleSlideover"
+          @click="toggleSlideSheet"
         >
           My Team
         </UButton>
@@ -101,14 +100,8 @@ defineExpose({ draftPicks });
       value-attribute="value"
     />
     <section class="sm:flex-row flex-col flex sm:col-span-3 gap-4">
-      <div
-        v-for="(_, categoryKey) in pointsMapping"
-        :key="categoryKey"
-        class="flex flex-col"
-      >
-        <h5
-          class="capitalize text-xs font-semibold light:text-slate-600 dark:text-white mb-1"
-        >
+      <div v-for="(_, categoryKey) in pointsMapping" :key="categoryKey" class="flex flex-col">
+        <h5 class="capitalize text-xs font-semibold light:text-slate-600 dark:text-white mb-1">
           {{ categoryKey }}
         </h5>
         <div v-if="pointsMapping" class="flex gap-1 flex-wrap">
@@ -127,9 +120,7 @@ defineExpose({ draftPicks });
         </div>
       </div>
     </section>
-    <section
-      class="flex gap-2 sm:items-center sm:col-span-3 sm:flex-row flex-col"
-    >
+    <section class="flex gap-2 sm:items-center sm:col-span-3 sm:flex-row flex-col">
       <h3 class="text-sm">Picks:</h3>
       <div class="flex gap-2 flex-wrap">
         <p

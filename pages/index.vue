@@ -2,10 +2,10 @@
 import type { Player, Position } from '@/types/player.ts';
 import { calculateRoundPick } from '@/utils/strings';
 import { usePlayersStore } from '@/stores/players';
-import useSlideover from '@/composables/useSlideover';
+import useSlideSheet from '@/composables/useSlideSheet';
 
 const store = usePlayersStore();
-const { isSlideoverOpen } = useSlideover;
+const { isSlideSheetOpen } = useSlideSheet;
 
 const scoringType = ref<'STD' | 'PPR' | 'HALF'>('STD');
 const leagueSize = ref(12);
@@ -47,10 +47,8 @@ function calculateTotalPoints(stats: Player['stats']): string {
 
     if (statCategory && pointsCategory) {
       for (const stat in statCategory) {
-        const statPoints: number =
-          pointsCategory[stat as keyof typeof pointsCategory];
-        const statValue: string =
-          statCategory[stat as keyof typeof pointsCategory];
+        const statPoints: number = pointsCategory[stat as keyof typeof pointsCategory];
+        const statValue: string = statCategory[stat as keyof typeof pointsCategory];
         if (statPoints && statValue) {
           totalPoints += parseFloat(statValue.replace(',', '')) * statPoints;
         }
@@ -71,17 +69,12 @@ const allTableData = computed<Player[]>(() => {
     return {
       ...player,
       fpts: calculateTotalPoints(player.stats),
-      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(
-        ' | '
-      ),
+      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(' | '),
     };
   });
 });
 
-function calculateVorp(
-  playerData: Player[],
-  position: Exclude<Position, 'DST'>
-) {
+function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>) {
   const replacementMapping = {
     QB: leagueSize.value,
     RB: leagueSize.value * 2,
@@ -100,9 +93,7 @@ function calculateVorp(
   });
 }
 function getPositionTableData(position: Exclude<Position, 'DST'>) {
-  const players = allTableData.value.filter(
-    (player) => player.position === position
-  );
+  const players = allTableData.value.filter((player) => player.position === position);
   return calculateVorp(players, position);
 }
 const qbTableData = computed(() => getPositionTableData('QB'));
@@ -195,6 +186,6 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :picks="draftPicks"
       />
     </section>
-    <TeamSlideover v-model="isSlideoverOpen" />
+    <TeamSlideover v-model="isSlideSheetOpen" />
   </div>
 </template>

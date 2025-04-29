@@ -59,26 +59,18 @@ export const usePlayersStore = defineStore('players', {
           this.allPlayerData = rankingData.players
             .filter(({ player_team_id }) => player_team_id !== 'FA')
             .reduce<Player[]>((data, playerData) => {
-              const combinedPositionProjectionData =
-                this.qbProjectionData.concat(
-                  this.wrProjectionData,
-                  this.rbProjectionData,
-                  this.teProjectionData
-                );
+              const combinedPositionProjectionData = this.qbProjectionData.concat(
+                this.wrProjectionData,
+                this.rbProjectionData,
+                this.teProjectionData
+              );
               const matchingInjuredPlayer = this.playerInjuriesData.find(
                 ({ player_id }) => player_id === playerData?.player_id
               );
-              const matchingPlayerProjection =
-                combinedPositionProjectionData?.find(
-                  ({ player_id }) =>
-                    player_id === playerData.player_id.toString()
-                );
-              const {
-                player_id,
-                player: name,
-                fpts,
-                ...stats
-              } = matchingPlayerProjection || {};
+              const matchingPlayerProjection = combinedPositionProjectionData?.find(
+                ({ player_id }) => player_id === playerData.player_id.toString()
+              );
+              const { player_id, player: name, fpts, ...stats } = matchingPlayerProjection || {};
 
               const player: Player = {
                 player_id: playerData.player_id,
@@ -86,10 +78,7 @@ export const usePlayersStore = defineStore('players', {
                 team: playerData.player_team_id,
                 position: playerData.player_position_id as Position,
                 url: playerData.player_page_url,
-                image: playerData.player_image_url.replace(
-                  '210x210.png',
-                  '100x100.webp'
-                ),
+                image: playerData.player_image_url.replace('210x210.png', '100x100.webp'),
                 bye_week: playerData.player_bye_week,
                 tier: playerData.tier,
                 rank: {
@@ -112,9 +101,7 @@ export const usePlayersStore = defineStore('players', {
       }
     },
     isPlayerRemoved(playerId: number) {
-      return this.removedPlayers.some(
-        ({ player_id }) => player_id === playerId
-      );
+      return this.removedPlayers.some(({ player_id }) => player_id === playerId);
     },
     removePlayer(player: Player) {
       const toast = useToast();
@@ -124,7 +111,7 @@ export const usePlayersStore = defineStore('players', {
       if (matchingIndex === -1) {
         this.removedPlayers.push(player);
         toast.add({
-          title: `${player.player_name} has been removed`,
+          title: `${player.player_name} has been removed from the board`,
           timeout: 3000,
         });
       } else {
@@ -139,11 +126,12 @@ export const usePlayersStore = defineStore('players', {
       const matchingIndex = this.teamPicks.findIndex(
         ({ player_id }) => player_id === player.player_id
       );
-      const isNewPick = matchingIndex === -1;
-      const playerPickedMessage = isNewPick ? 'added to' : 'removed from';
-      const icon = isNewPick ? 'i-ph-plus-bold' : 'i-ph-minus-bold';
-      const toastMessage = `${player.player_name} has been ${playerPickedMessage} your team`;
-      if (isNewPick) {
+      const isAddingPlayer = matchingIndex === -1;
+      const icon = isAddingPlayer ? 'i-ph-plus-bold' : 'i-ph-minus-bold';
+      const toastMessage = isAddingPlayer
+        ? `You have drafted ${player.player_name} to your team`
+        : `You have removed ${player.player_name} from your team`;
+      if (isAddingPlayer) {
         this.teamPicks.push(player);
       } else {
         this.teamPicks.splice(matchingIndex, 1);
