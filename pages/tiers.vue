@@ -25,10 +25,7 @@ const scoringOptions: { value: ScoringType; label: string }[] = [
 const scoringSelected = ref<ScoringType>(scoringOptions[0].value);
 
 const positionMapping = computed(() => {
-  const playerMap: Record<
-    Position,
-    { numOfPlayers: number; numOfTiers: number }
-  > = {
+  const playerMap: Record<Position, { numOfPlayers: number; numOfTiers: number }> = {
     QB: { numOfPlayers: 26, numOfTiers: 8 },
     WR: { numOfPlayers: 60, numOfTiers: 12 },
     RB: { numOfPlayers: 40, numOfTiers: 9 },
@@ -40,16 +37,15 @@ const positionMapping = computed(() => {
   return playerMap[positionSelected.value];
 });
 
-const nflWeek = computed(() => {
-  const startDate = dayjs('September 2, 2024');
+const nflWeek = computed<number>(() => {
+  const startDate = dayjs('September 2, 2025');
   const today = dayjs();
-  return Math.ceil(today.diff(startDate, 'week', true)).toString();
+  const nflWeek = Math.ceil(today.diff(startDate, 'week', true));
+  return nflWeek < 0 ? 0 : nflWeek > 18 ? 18 : nflWeek;
 });
 
-const weekOptions = Array.from({ length: Number(nflWeek.value) + 1 }, (_, i) =>
-  i.toString()
-);
-const weekSelected = ref(nflWeek.value);
+const weekOptions = Array.from({ length: nflWeek.value + 1 }, (_, i) => i.toString());
+const weekSelected = ref<number>(nflWeek.value);
 
 const rankingQuery = computed(() => {
   return {
@@ -65,9 +61,7 @@ const { data: playerRankData } = useFetch('/api/rankings', {
 const players = computed(() => playerRankData?.value?.players);
 const lastUpdatedTime = computed(() => {
   const lastUpdatedTs = playerRankData?.value?.last_updated_ts;
-  return lastUpdatedTs
-    ? dayjs.unix(lastUpdatedTs).format('ddd MMM DD h:mm A')
-    : '';
+  return lastUpdatedTs ? dayjs.unix(lastUpdatedTs).format('ddd MMM DD h:mm A') : '';
 });
 
 const chartData = computed(() => {
@@ -125,15 +119,9 @@ watch(
   (newQuery, oldQuery) => {
     if (newQuery === oldQuery) return;
     const { position, scoring } = newQuery;
-    if (
-      typeof position === 'string' &&
-      validPositions.includes(position as Position)
-    )
+    if (typeof position === 'string' && validPositions.includes(position as Position))
       positionSelected.value = position as Position;
-    if (
-      typeof scoring === 'string' &&
-      validScoringTypes.includes(scoring as ScoringType)
-    )
+    if (typeof scoring === 'string' && validScoringTypes.includes(scoring as ScoringType))
       scoringSelected.value = scoring as ScoringType;
   },
   { immediate: true }
@@ -145,8 +133,8 @@ watch(
     <section>
       <h3 class="text-xl font-medium">Player Tiers</h3>
       <p>
-        Pick a position and your league's scoring type to easily compare players
-        and decide your starters.
+        Pick a position and your league's scoring type to easily compare players and decide your
+        starters.
       </p>
     </section>
     <div class="flex flex-col gap-6">
@@ -167,18 +155,11 @@ watch(
             value-attribute="value"
             label="Scoring"
           />
-          <AppSelect
-            v-model="weekSelected"
-            size="sm"
-            :options="weekOptions"
-            label="Week"
-          />
+          <AppSelect v-model="weekSelected" size="sm" :options="weekOptions" label="Week" />
         </div>
       </div>
       <div class="flex flex-col border-b border-solid border-neutral-200 pb-6">
-        <p class="text-xs self-end text-gray-500">
-          Last Updated: {{ lastUpdatedTime }}
-        </p>
+        <p class="text-xs self-end text-gray-500">Last Updated: {{ lastUpdatedTime }}</p>
         <TierChart :data="chartData" />
       </div>
       <div>
@@ -188,9 +169,7 @@ watch(
             :key="index"
             class="flex gap-2 py-2 first:pt-0 last:pb-0 last:border-none items-center border-b border-solid border-gray-200"
           >
-            <span class="text-sm text-gray-500 min-w-fit"
-              >Tier {{ index + 1 }}</span
-            >
+            <span class="text-sm text-gray-500 min-w-fit">Tier {{ index + 1 }}</span>
             <span>{{ tier?.join(', ') }}</span>
           </li>
         </ul>

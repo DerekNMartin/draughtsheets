@@ -70,8 +70,9 @@ function handleQueryParams(event: H3Event) {
 
 export default defineCachedEventHandler(
   async (event) => {
+    const currentYear = new Date().getFullYear();
     return await $fetch<FpRankingsResponse>(
-      'https://api.fantasypros.com/v2/json/nfl/2024/consensus-rankings',
+      `https://api.fantasypros.com/v2/json/nfl/${currentYear}/consensus-rankings`,
       {
         headers: {
           'x-api-key': process.env.FFP_API_KEY || '',
