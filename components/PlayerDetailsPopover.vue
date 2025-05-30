@@ -50,7 +50,9 @@ onMounted(() => {
             img-class="object-cover"
           />
           <div class="flex flex-col">
-            <p class="font-semibold text-neutral-800">{{ player.fullName }}</p>
+            <p class="font-semibold text-neutral-800 dark:text-neutral-300">
+              {{ player.fullName }}
+            </p>
             <p class="text-xs">
               EXP | {{ player.experience.years > 0 ? player.experience.years : 'Rookie' }}
             </p>
