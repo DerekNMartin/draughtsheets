@@ -16,10 +16,7 @@ const injuryMapping = {
 <template>
   <div class="flex gap-4 items-center">
     <UTooltip
-      :text="
-        player.injury &&
-        `${player.injury.injury_type} | ${player.injury.comment}`
-      "
+      :text="player.injury && `${player.injury.injury_type} | ${player.injury.comment}`"
       :prevent="!Boolean(player.injury)"
     >
       <UAvatar
@@ -35,24 +32,21 @@ const injuryMapping = {
           @click.stop="emit('avatar-click', player)"
         >
           <UIcon
-            :name="
-              store.isPlayerPicked(player.player_id)
-                ? 'i-ph-minus-bold'
-                : 'i-ph-plus-bold'
-            "
+            :name="store.isPlayerPicked(player.player_id) ? 'i-ph-minus-bold' : 'i-ph-plus-bold'"
             class="w-4 h-4 group-hover/avatar:scale-100 scale-0 transition-transform delay-100 text-blue-800 dark:text-blue-400"
           />
         </span>
       </UAvatar>
     </UTooltip>
     <div class="flex flex-col">
-      <a :href="player.url" target="_blank" @click.stop>
-        <h5
-          class="font-semibold text-blue-800 dark:text-blue-400 hover:underline"
-        >
-          {{ player.player_name }}
-        </h5>
-      </a>
+      <UPopover mode="hover">
+        <a :href="player.url" target="_blank" @click.stop>
+          <h5 class="font-semibold text-blue-800 dark:text-blue-400 hover:underline">
+            {{ player.player_name }}
+          </h5>
+        </a>
+        <template #panel> <PlayerDetailsPopover :team="player.team" /> </template>
+      </UPopover>
       <span class="text-sm text-neutral-500">{{ player.team }} | {{ player.bye_week }}</span>
     </div>
   </div>
