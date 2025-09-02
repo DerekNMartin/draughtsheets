@@ -18,7 +18,7 @@ const props = defineProps<{
   data: Player[];
   header?: string;
   search?: string;
-  filter?: { team: string };
+  filter?: { team: string; round: string };
   minMax: { min: number; max: number };
   position: Exclude<Position, 'DST'>;
   picks?: number[];
@@ -135,7 +135,12 @@ const tableData = computed(() => {
 });
 
 const filteredData = computed(() => {
-  if (!props?.search && props.filter?.team === 'All') return tableData.value;
+  if (
+    !props?.search &&
+    props.filter?.team === 'All' &&
+    props.filter.round === 'All'
+  )
+    return tableData.value;
   return tableData.value
     .filter(({ player_name }) => {
       return player_name
@@ -144,6 +149,12 @@ const filteredData = computed(() => {
     })
     .filter(({ team }) => {
       return props.filter?.team === 'All' ? true : team === props.filter?.team;
+    })
+    .filter(({ round_pick }) => {
+      const round = round_pick?.split('|')[0].trim();
+      return props.filter?.round === 'All'
+        ? true
+        : round === props.filter?.round;
     });
 });
 
@@ -157,12 +168,10 @@ function handlePickPlayer(player: Player) {
 
 <template>
   <UCard
-    :ui="{ ring: positionTableType.ring, body: { padding: 'sm:p-0 p-0' } }"
-  >
+    :ui="{ ring: positionTableType.ring, body: { padding: 'sm:p-0 p-0' } }">
     <template #header>
       <section
-        class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2"
-      >
+        class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2">
         <h2 class="font-semibold">{{ positionTableType.title }}</h2>
       </section>
     </template>
@@ -183,10 +192,9 @@ function handlePickPlayer(player: Player) {
           },
           td: { padding: 'px-2 py-1' },
         }"
-        @select="handleRemovePlayer"
-      >
+        @select="handleRemovePlayer">
         <template #player_name-data="{ row }">
-          <PlayerAvatar :player="row" @avatar-click="handlePickPlayer"/>
+          <PlayerAvatar :player="row" @avatar-click="handlePickPlayer" />
         </template>
         <template #round_pick-data="{ row }">
           <div
@@ -195,8 +203,7 @@ function handlePickPlayer(player: Player) {
               'text-neutral-800 dark:text-slate-200 font-bold': picks?.includes(
                 row.rank.ecr
               ),
-            }"
-          >
+            }">
             <span class="group-hover:hidden">{{ row.round_pick }}</span>
             <span class="group-hover:inline-block hidden">
               {{ row.rank.ecr }}
@@ -206,16 +213,14 @@ function handlePickPlayer(player: Player) {
         <template #vorp-data="{ row }">
           <span
             class="p-1 rounded text-white font-bold"
-            :style="{ background: row.vorpColour }"
-          >
+            :style="{ background: row.vorpColour }">
             {{ row.vorp }}
           </span>
         </template>
         <template #scarcity-data="{ row }">
           <span
             class="p-1 rounded text-neutral-800"
-            :style="{ background: row.scarcity.colour }"
-          >
+            :style="{ background: row.scarcity.colour }">
             {{ row.scarcity.value }}%
           </span>
         </template>

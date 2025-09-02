@@ -47,8 +47,10 @@ function calculateTotalPoints(stats: Player['stats']): string {
 
     if (statCategory && pointsCategory) {
       for (const stat in statCategory) {
-        const statPoints: number = pointsCategory[stat as keyof typeof pointsCategory];
-        const statValue: string = statCategory[stat as keyof typeof pointsCategory];
+        const statPoints: number =
+          pointsCategory[stat as keyof typeof pointsCategory];
+        const statValue: string =
+          statCategory[stat as keyof typeof pointsCategory];
         if (statPoints && statValue) {
           totalPoints += parseFloat(statValue.replace(',', '')) * statPoints;
         }
@@ -69,12 +71,17 @@ const allTableData = computed<Player[]>(() => {
     return {
       ...player,
       fpts: calculateTotalPoints(player.stats),
-      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(' | '),
+      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(
+        ' | '
+      ),
     };
   });
 });
 
-function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>) {
+function calculateVorp(
+  playerData: Player[],
+  position: Exclude<Position, 'DST'>
+) {
   const replacementMapping = {
     QB: leagueSize.value,
     RB: leagueSize.value * 2,
@@ -93,7 +100,9 @@ function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>)
   });
 }
 function getPositionTableData(position: Exclude<Position, 'DST'>) {
-  const players = allTableData.value.filter((player) => player.position === position);
+  const players = allTableData.value.filter(
+    (player) => player.position === position
+  );
   return calculateVorp(players, position);
 }
 const qbTableData = computed(() => getPositionTableData('QB'));
@@ -127,7 +136,17 @@ const teamSelectOptions = computed(() => {
   return teams;
 });
 const teamSelected = ref(teamSelectOptions.value[0]);
-const filter = computed(() => ({ team: teamSelected.value }));
+
+const filterRoundOptions = computed(() => {
+  const rounds = Array.from({ length: 16 }, (_, i) => Number(i + 1).toString());
+  return ['All', ...rounds];
+});
+const filterRoundSelected = ref(filterRoundOptions.value[0]);
+
+const filter = computed(() => ({
+  team: teamSelected.value,
+  round: filterRoundSelected.value,
+}));
 const searchValue = ref();
 
 const LeagueSettingsRef = ref();
@@ -141,13 +160,13 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
       v-model:scoring-type="scoringType"
       v-model:league-size="leagueSize"
       v-model:pick-number="pickNumber"
-      v-model:points-mapping="pointsMapping"
-    />
+      v-model:points-mapping="pointsMapping" />
     <TableFilter
       v-model:search="searchValue"
       v-model:team="teamSelected"
+      v-model:round="filterRoundSelected"
       :team-options="teamSelectOptions"
-    />
+      :round-options="filterRoundOptions" />
     <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
         position="QB"
@@ -156,8 +175,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks"
-      />
+        :picks="draftPicks" />
       <PlayersTable
         position="RB"
         :loading="isFetchingPlayerData"
@@ -165,8 +183,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks"
-      />
+        :picks="draftPicks" />
       <PlayersTable
         position="WR"
         :loading="isFetchingPlayerData"
@@ -174,8 +191,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks"
-      />
+        :picks="draftPicks" />
       <PlayersTable
         position="TE"
         :loading="isFetchingPlayerData"
@@ -183,8 +199,7 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks"
-      />
+        :picks="draftPicks" />
     </section>
     <TeamSlideover v-model="isSlideSheetOpen" />
   </div>
