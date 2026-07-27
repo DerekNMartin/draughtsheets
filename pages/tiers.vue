@@ -38,7 +38,7 @@ const positionMapping = computed(() => {
 });
 
 const nflWeek = computed<number>(() => {
-  const startDate = dayjs('September 2, 2025');
+  const startDate = dayjs('September 2, 2026');
   const today = dayjs();
   const nflWeek = Math.ceil(today.diff(startDate, 'week', true));
   return nflWeek < 0 ? 0 : nflWeek > 18 ? 18 : nflWeek;
