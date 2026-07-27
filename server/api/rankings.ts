@@ -34,6 +34,7 @@ interface RankingPlayer {
   sportsdata_id: string;
   start_sit_grade: string;
   tag: string;
+  tier: number;
 }
 
 interface FpRankingsResponse {

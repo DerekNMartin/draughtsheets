@@ -68,7 +68,7 @@ export const usePlayersStore = defineStore('players', {
                 ({ player_id }) => player_id === playerData?.player_id
               );
               const matchingPlayerProjection = combinedPositionProjectionData?.find(
-                ({ player_id }) => player_id === playerData.player_id.toString()
+                ({ player_id }) => player_id === playerData?.player_id
               );
               const { player_id, player: name, fpts, ...stats } = matchingPlayerProjection || {};
 

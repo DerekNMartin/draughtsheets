@@ -1,26 +1,85 @@
-import { parse } from 'node-html-parser';
+import { isEmpty } from '@/utils/misc';
 
-type StatColumns = [
-  'player',
-  'att',
-  'cmp',
-  'yds',
-  'tds',
-  'ints',
-  'fl',
-  'fpts',
-  'rec'
-];
-type HeaderKeys = 'passing' | 'rushing' | 'receiving' | 'misc';
-type SubHeadingKeys = Exclude<StatColumns[number], 'player'>[];
+type PlayerStat = {
+  tds: number;
+  yds: number;
+  rec?: number;
+  att?: number;
+  cmp?: number;
+  ints?: number;
+};
+
+type FpProjectionsResponse = {
+  season: string;
+  week: string;
+  count: string;
+  positions: string;
+  scoring: string;
+  players: FpProjectionPlayer[];
+};
+
+type FpProjectionQbStats = {
+  points: number;
+  points_ppr: number;
+  points_half: number;
+  pass_att: number;
+  pass_cmp: number;
+  pass_yds: number;
+  pass_tds: number;
+  pass_ints: number;
+  pass_yds_300: number;
+  pass_yds_400: number;
+  rush_att: number;
+  rush_yds: number;
+  rush_tds: number;
+  rush_yds_100: number;
+  rush_yds_200: number;
+  scrimage_yards_100: number;
+  scrimage_yards_200: number;
+  fumbles: number;
+  ret_tds: number;
+  '2pt_tds': number;
+};
+
+type FpProjectionPositionStats = {
+  points: number;
+  points_ppr: number;
+  points_half: number;
+  rush_att: number;
+  rush_yds: number;
+  rush_tds: number;
+  rush_yds_100: number;
+  rush_yds_200: number;
+  scrimage_yards_100: number;
+  scrimage_yards_200: number;
+  rec_rec: number;
+  rec_yds: number;
+  rec_tds: number;
+  rec_yds_100: number;
+  rec_yds_200: number;
+  fumbles: number;
+  ret_tds: number;
+  '2pt_tds': number;
+};
+
+type FpProjectionPlayer = {
+  fpid: number;
+  mflid: string;
+  name: string;
+  position_id: string;
+  team_id: string;
+  filename: string;
+  stats: FpProjectionQbStats | FpProjectionPositionStats;
+};
+
 export type ProjectionsPlayer = {
-  player_id?: string;
+  player_id?: number;
   player?: string;
   fpts?: string | number;
-  passing?: Partial<Record<SubHeadingKeys[number], string>>;
-  rushing?: Partial<Record<SubHeadingKeys[number], string>>;
-  receiving?: Partial<Record<SubHeadingKeys[number], string>>;
-  misc?: Partial<Record<SubHeadingKeys[number], string>>;
+  passing?: PlayerStat;
+  rushing?: PlayerStat;
+  receiving?: PlayerStat;
+  misc?: { fl: number; fpts: number };
 };
 
 const validPositionQueries = ['qb', 'rb', 'wr', 'te', 'k', 'dst'] as const;
@@ -39,65 +98,67 @@ function handleQueries(query: QueryInterface) {
     });
   }
 
-  return { position };
+  return { position: position.toUpperCase() };
 }
 
-function parseProjectionsTable(response: string) {
-  const pageRoot = parse(response);
-  const table = pageRoot.getElementById('data');
-  const subHeadings = table
-    ?.querySelectorAll('th')
-    .map(({ text }) => text.toLowerCase()) as StatColumns;
-  const headingMap = table
-    ?.querySelector('thead')
-    ?.querySelectorAll('td')
-    .reduce<Record<string, string[]>[]>((acc, subHeadingElement) => {
-      if (subHeadingElement.textContent.trim()) {
-        const end = Number(subHeadingElement.getAttribute('colspan'));
-        const heading = subHeadingElement.textContent.toLowerCase();
-        const headingObj: Record<string, string[]> = {};
-        headingObj[heading] = subHeadings.splice(1, end);
-        acc.push(headingObj);
-      }
-      return acc;
-    }, []);
-  const rows = table?.querySelector('tbody')?.querySelectorAll('tr');
-  const data = rows?.reduce<ProjectionsPlayer[]>((dataArr, row) => {
-    const id = row.classList?.value[0].match(/\d/g)?.join('');
-    const rowValues = row
-      .querySelectorAll('td')
-      .map((item) => item.textContent);
-    const player: ProjectionsPlayer = {
-      player_id: id,
-      player: rowValues[0],
-      fpts: rowValues[rowValues.length - 1],
+function getPlayerStats(statTypeKeyPrefix: 'pass' | 'rec' | 'rush', player: FpProjectionPlayer) {
+  return Object.entries(player.stats).reduce((stats, [currentKey, currentValue]) => {
+    if (currentKey.includes(statTypeKeyPrefix)) {
+      const key = currentKey.replace(statTypeKeyPrefix + '_', '') as keyof PlayerStat;
+      stats[key] = currentValue;
+    }
+    return stats;
+  }, {} as PlayerStat);
+}
+
+/**
+ * Transforms FFP player projection data to fit our own defined schema.
+ */
+function transformProjections(response: FpProjectionsResponse): ProjectionsPlayer[] {
+  return response.players.map((player) => {
+    const miscStats = {
+      fl: player.stats.fumbles,
+      fpts: player.stats.points,
     };
-
-    let statIndex = 1;
-
-    headingMap?.forEach((headingObj) => {
-      const heading = Object.keys(headingObj)[0] as HeaderKeys; // Get the heading name
-      const subHeadingsForHeading = headingObj[heading] as SubHeadingKeys; // Get the subheadings for this heading
-
-      player[heading] = {}; // Initialize an empty object for this heading
-
-      subHeadingsForHeading.forEach((subHeading) => {
-        if (player[heading]) player[heading][subHeading] = rowValues[statIndex]; // Map the stat to the subheading
-        statIndex++;
-      });
-    });
-
-    dataArr.push(player);
-    return dataArr;
-  }, []);
-  return data;
+    const passStats = getPlayerStats('pass', player);
+    const recStats = getPlayerStats('rec', player);
+    const rushStats = getPlayerStats('rush', player);
+    return {
+      player_id: player.fpid,
+      player: player.name,
+      fpts: player.stats.points,
+      misc: miscStats,
+      ...(!isEmpty(passStats) && { passing: passStats }),
+      ...(!isEmpty(rushStats) && { rushing: rushStats }),
+      ...(!isEmpty(recStats) && { receiving: recStats }),
+    };
+  });
 }
 
-export default defineEventHandler(async (event) => {
-  const query = getQuery<QueryInterface>(event);
-  const { position } = handleQueries(query);
-  const response: string = await $fetch(
-    `https://www.fantasypros.com/nfl/projections/${position}.php?week=draft`
-  );
-  return parseProjectionsTable(response);
-});
+/**
+ * Returns player projections from FantasyPros.
+ * https://api.fantasypros.com/public/v2/docs#tag/Projections/paths/~1nfl~1%7Bseason%7D~1projections/get
+ */
+export default defineCachedEventHandler(
+  async (event) => {
+    const query = getQuery<QueryInterface>(event);
+    const { position } = handleQueries(query);
+    const currentYear = new Date().getFullYear();
+
+    const response = await $fetch<FpProjectionsResponse>(
+      `https://api.fantasypros.com/public/v2/json/nfl/${currentYear}/projections`,
+      {
+        headers: {
+          'x-api-key': process.env.FFP_API_KEY || '',
+        },
+        params: {
+          week: 0,
+          position,
+        },
+      }
+    );
+
+    return transformProjections(response);
+  },
+  { maxAge: 30 * 60 /* 30 minutes */ }
+);

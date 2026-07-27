@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Player, Position } from '@/types/player.ts';
+import type { Player, Position } from '@/types/player';
 import { calculateRoundPick } from '@/utils/strings';
 import { usePlayersStore } from '@/stores/players';
 import useSlideSheet from '@/composables/useSlideSheet';
@@ -44,15 +44,12 @@ function calculateTotalPoints(stats: Player['stats']): string {
   for (const category in stats) {
     const statCategory = stats[category as StatCategory];
     const pointsCategory = pointsMapping[category as StatCategory];
-
     if (statCategory && pointsCategory) {
       for (const stat in statCategory) {
-        const statPoints: number =
-          pointsCategory[stat as keyof typeof pointsCategory];
-        const statValue: string =
-          statCategory[stat as keyof typeof pointsCategory];
+        const statPoints: number = pointsCategory[stat as keyof typeof pointsCategory];
+        const statValue: number = statCategory[stat as keyof typeof pointsCategory];
         if (statPoints && statValue) {
-          totalPoints += parseFloat(statValue.replace(',', '')) * statPoints;
+          totalPoints += statValue * statPoints;
         }
       }
     }
@@ -71,17 +68,12 @@ const allTableData = computed<Player[]>(() => {
     return {
       ...player,
       fpts: calculateTotalPoints(player.stats),
-      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(
-        ' | '
-      ),
+      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(' | '),
     };
   });
 });
 
-function calculateVorp(
-  playerData: Player[],
-  position: Exclude<Position, 'DST'>
-) {
+function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>) {
   const replacementMapping = {
     QB: leagueSize.value,
     RB: leagueSize.value * 2,
@@ -92,7 +84,9 @@ function calculateVorp(
   const replacementPlayer = playerData[replacementIndex];
 
   return playerData.map((player) => {
-    const vorp = Number(player.fpts) - Number(replacementPlayer.fpts);
+    const playerFPTS = Number(player?.fpts) || 0;
+    const replacementFPTS = Number(replacementPlayer?.fpts) || 0;
+    const vorp = playerFPTS - replacementFPTS;
     return {
       ...player,
       vorp: Number(vorp.toFixed(1)),
@@ -100,9 +94,7 @@ function calculateVorp(
   });
 }
 function getPositionTableData(position: Exclude<Position, 'DST'>) {
-  const players = allTableData.value.filter(
-    (player) => player.position === position
-  );
+  const players = allTableData.value.filter((player) => player.position === position);
   return calculateVorp(players, position);
 }
 const qbTableData = computed(() => getPositionTableData('QB'));
@@ -160,13 +152,15 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
       v-model:scoring-type="scoringType"
       v-model:league-size="leagueSize"
       v-model:pick-number="pickNumber"
-      v-model:points-mapping="pointsMapping" />
+      v-model:points-mapping="pointsMapping"
+    />
     <TableFilter
       v-model:search="searchValue"
       v-model:team="teamSelected"
       v-model:round="filterRoundSelected"
       :team-options="teamSelectOptions"
-      :round-options="filterRoundOptions" />
+      :round-options="filterRoundOptions"
+    />
     <section class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
       <PlayersTable
         position="QB"
@@ -175,7 +169,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="RB"
         :loading="isFetchingPlayerData"
@@ -183,7 +178,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="WR"
         :loading="isFetchingPlayerData"
@@ -191,7 +187,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
       <PlayersTable
         position="TE"
         :loading="isFetchingPlayerData"
@@ -199,7 +196,8 @@ const draftPicks = computed(() => LeagueSettingsRef.value?.draftPicks);
         :min-max="minMaxVorp"
         :search="searchValue"
         :filter
-        :picks="draftPicks" />
+        :picks="draftPicks"
+      />
     </section>
     <TeamSlideover v-model="isSlideSheetOpen" />
   </div>
