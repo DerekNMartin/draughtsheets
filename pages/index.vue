@@ -38,7 +38,7 @@ const pointsMapping = reactive({
 });
 type PointsMapping = typeof pointsMapping;
 type StatCategory = keyof PointsMapping;
-function calculateTotalPoints(stats: Player['stats']): string {
+function calculateTotalPoints(stats: Player['stats']): number {
   let totalPoints = 0;
 
   for (const category in stats) {
@@ -55,7 +55,7 @@ function calculateTotalPoints(stats: Player['stats']): string {
     }
   }
 
-  return totalPoints.toFixed(1);
+  return Number(totalPoints.toFixed(1));
 }
 watch(scoringType, (newValue) => {
   if (newValue === 'STD') pointsMapping.receiving.rec = 0;

@@ -40,7 +40,7 @@ const columns = [
   },
   {
     key: 'fpts',
-    label: 'Projected',
+    label: 'FPTS',
     sortable: true,
     direction: 'desc',
   },
@@ -56,10 +56,7 @@ const sort = ref({
 });
 
 const positionTableType = computed(() => {
-  const mapping: Record<
-    Exclude<Position, 'DST'>,
-    { title: string; ring: string }
-  > = {
+  const mapping: Record<Exclude<Position, 'DST'>, { title: string; ring: string }> = {
     QB: {
       title: 'Quarterback',
       ring: 'ring-red-200 dark:ring-red-300',
@@ -81,10 +78,7 @@ const positionTableType = computed(() => {
 });
 
 function calcScarcity(data: Player[]) {
-  const totalValue = data.reduce(
-    (sum, { vorp }) => (vorp && vorp > 0 ? sum + vorp : sum),
-    0
-  );
+  const totalValue = data.reduce((sum, { vorp }) => (vorp && vorp > 0 ? sum + vorp : sum), 0);
   return data
     .sort((a, b) => (b.vorp || 0) - (a.vorp || 0))
     .reduce<TablePlayer[]>((prev, curr, index, original) => {
@@ -93,9 +87,7 @@ function calcScarcity(data: Player[]) {
         .slice(0, index + 1)
         .reduce((sum, { vorp }) => (vorp && vorp > 0 ? sum + vorp : sum), 0);
       const remainingTotal = totalValue - removedValues;
-      const percentageRemaining = Math.round(
-        (remainingTotal / totalValue) * 100
-      );
+      const percentageRemaining = Math.round((remainingTotal / totalValue) * 100);
       tablePlayer.scarcity = {
         value: percentageRemaining,
         colour: interpolateRgbColor(
@@ -124,37 +116,28 @@ const tableData = computed(() => {
         player.vorp || 0
       ),
       class: {
-        'filter grayscale !bg-slate-100 dark:!bg-slate-800':
-          store.isPlayerRemoved(player.player_id),
-        '!bg-blue-100 dark:!bg-blue-900': store.isPlayerPicked(
+        'filter grayscale !bg-slate-100 dark:!bg-slate-800': store.isPlayerRemoved(
           player.player_id
         ),
+        '!bg-blue-100 dark:!bg-blue-900': store.isPlayerPicked(player.player_id),
       },
     };
   });
 });
 
 const filteredData = computed(() => {
-  if (
-    !props?.search &&
-    props.filter?.team === 'All' &&
-    props.filter.round === 'All'
-  )
+  if (!props?.search && props.filter?.team === 'All' && props.filter.round === 'All')
     return tableData.value;
   return tableData.value
     .filter(({ player_name }) => {
-      return player_name
-        .toLowerCase()
-        .includes(props?.search?.toLowerCase() || '');
+      return player_name.toLowerCase().includes(props?.search?.toLowerCase() || '');
     })
     .filter(({ team }) => {
       return props.filter?.team === 'All' ? true : team === props.filter?.team;
     })
     .filter(({ round_pick }) => {
       const round = round_pick?.split('|')[0].trim();
-      return props.filter?.round === 'All'
-        ? true
-        : round === props.filter?.round;
+      return props.filter?.round === 'All' ? true : round === props.filter?.round;
     });
 });
 
@@ -167,11 +150,9 @@ function handlePickPlayer(player: Player) {
 </script>
 
 <template>
-  <UCard
-    :ui="{ ring: positionTableType.ring, body: { padding: 'sm:p-0 p-0' } }">
+  <UCard :ui="{ ring: positionTableType.ring, body: { padding: 'sm:p-0 p-0' } }">
     <template #header>
-      <section
-        class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2">
+      <section class="flex sm:justify-between sm:items-center sm:flex-row flex-col gap-2">
         <h2 class="font-semibold">{{ positionTableType.title }}</h2>
       </section>
     </template>
@@ -192,7 +173,8 @@ function handlePickPlayer(player: Player) {
           },
           td: { padding: 'px-2 py-1' },
         }"
-        @select="handleRemovePlayer">
+        @select="handleRemovePlayer"
+      >
         <template #player_name-data="{ row }">
           <PlayerAvatar :player="row" @avatar-click="handlePickPlayer" />
         </template>
@@ -200,10 +182,9 @@ function handlePickPlayer(player: Player) {
           <div
             class="group"
             :class="{
-              'text-neutral-800 dark:text-slate-200 font-bold': picks?.includes(
-                row.rank.ecr
-              ),
-            }">
+              'text-neutral-800 dark:text-slate-200 font-bold': picks?.includes(row.rank.ecr),
+            }"
+          >
             <span class="group-hover:hidden">{{ row.round_pick }}</span>
             <span class="group-hover:inline-block hidden">
               {{ row.rank.ecr }}
@@ -211,16 +192,12 @@ function handlePickPlayer(player: Player) {
           </div>
         </template>
         <template #vorp-data="{ row }">
-          <span
-            class="p-1 rounded text-white font-bold"
-            :style="{ background: row.vorpColour }">
+          <span class="p-1 rounded text-white font-bold" :style="{ background: row.vorpColour }">
             {{ row.vorp }}
           </span>
         </template>
         <template #scarcity-data="{ row }">
-          <span
-            class="p-1 rounded text-neutral-800"
-            :style="{ background: row.scarcity.colour }">
+          <span class="p-1 rounded text-neutral-800" :style="{ background: row.scarcity.colour }">
             {{ row.scarcity.value }}%
           </span>
         </template>

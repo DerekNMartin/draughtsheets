@@ -82,5 +82,8 @@ export default defineCachedEventHandler(
       }
     );
   },
-  { maxAge: 30 * 60 /* 30 minutes */ }
+  {
+    maxAge: 30 * 60 /* 30 minutes */,
+    getKey: (event: H3Event) => event.path,
+  }
 );
