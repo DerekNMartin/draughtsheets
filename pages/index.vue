@@ -55,7 +55,7 @@ function calculateTotalPoints(stats: Player['stats']): number {
     }
   }
 
-  return Number(totalPoints.toFixed(1));
+  return Math.round(totalPoints);
 }
 watch(scoringType, (newValue) => {
   if (newValue === 'STD') pointsMapping.receiving.rec = 0;
@@ -64,13 +64,15 @@ watch(scoringType, (newValue) => {
 });
 
 const allTableData = computed<Player[]>(() => {
-  return allPlayerData.value.map((player) => {
-    return {
-      ...player,
-      fpts: calculateTotalPoints(player.stats),
-      round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(' | '),
-    };
-  });
+  return allPlayerData.value
+    .map((player) => {
+      return {
+        ...player,
+        fpts: calculateTotalPoints(player.stats),
+        round_pick: calculateRoundPick(player.rank.ecr, leagueSize.value).join(' | '),
+      };
+    })
+    .sort((a, b) => (b.fpts || 0) - (a.fpts || 0));
 });
 
 function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>) {
@@ -89,7 +91,7 @@ function calculateVorp(playerData: Player[], position: Exclude<Position, 'DST'>)
     const vorp = playerFPTS - replacementFPTS;
     return {
       ...player,
-      vorp: Number(vorp.toFixed(1)),
+      vorp: Math.round(vorp),
     };
   });
 }

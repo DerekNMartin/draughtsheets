@@ -192,12 +192,18 @@ function handlePickPlayer(player: Player) {
           </div>
         </template>
         <template #vorp-data="{ row }">
-          <span class="p-1 rounded text-white font-bold" :style="{ background: row.vorpColour }">
+          <span
+            class="py-1 px-2 rounded text-white font-bold"
+            :style="{ background: row.vorpColour }"
+          >
             {{ row.vorp }}
           </span>
         </template>
         <template #scarcity-data="{ row }">
-          <span class="p-1 rounded text-neutral-800" :style="{ background: row.scarcity.colour }">
+          <span
+            class="py-1 px-2 rounded text-neutral-800"
+            :style="{ background: row.scarcity.colour }"
+          >
             {{ row.scarcity.value }}%
           </span>
         </template>

@@ -40,13 +40,15 @@ export const usePlayersStore = defineStore('players', {
       });
     },
     async fetchAllPlayerData(scoringType: 'STD' | 'PPR' | 'HALF') {
-      if (!this.playerInjuriesData.length) await this.fetchPlayerInjuryData();
-      if (!this.qbProjectionData.length) await this.fetchQbProjectionData();
-      if (!this.rbProjectionData.length) await this.fetchRbProjectionData();
-      if (!this.wrProjectionData.length) await this.fetchWrProjectionData();
-      if (!this.teProjectionData.length) await this.fetchTeProjectionData();
       try {
         this.isFetchingPlayerData = true;
+
+        if (!this.playerInjuriesData.length) await this.fetchPlayerInjuryData();
+        if (!this.qbProjectionData.length) await this.fetchQbProjectionData();
+        if (!this.rbProjectionData.length) await this.fetchRbProjectionData();
+        if (!this.wrProjectionData.length) await this.fetchWrProjectionData();
+        if (!this.teProjectionData.length) await this.fetchTeProjectionData();
+
         const rankingData = await $fetch('/api/rankings', {
           query: {
             position: 'all',
