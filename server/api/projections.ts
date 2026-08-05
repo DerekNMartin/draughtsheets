@@ -146,7 +146,7 @@ export default defineCachedEventHandler(
     const currentYear = new Date().getFullYear();
 
     const response = await $fetch<FpProjectionsResponse>(
-      `https://api.fantasypros.com/public/v2/json/nfl/${currentYear}/projections`,
+      `https://api.fantasypros.com/v2/json/nfl/${currentYear}/projections`,
       {
         headers: {
           'x-api-key': process.env.FFP_API_KEY || '',

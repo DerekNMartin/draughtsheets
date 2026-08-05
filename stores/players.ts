@@ -3,17 +3,29 @@ import type { Player, Position } from '@/types/player';
 import type { InjuredPlayer } from '@/server/api/injuries';
 import type { ProjectionsPlayer } from '@/server/api/projections';
 
+type PlayerStoreState = {
+  isFetchingPlayerData: boolean;
+  allPlayerData: Player[];
+  playerInjuriesData: InjuredPlayer[];
+  qbProjectionData: ProjectionsPlayer[];
+  wrProjectionData: ProjectionsPlayer[];
+  rbProjectionData: ProjectionsPlayer[];
+  teProjectionData: ProjectionsPlayer[];
+  removedPlayers: Player[];
+  teamPicks: Player[];
+};
+
 export const usePlayersStore = defineStore('players', {
-  state: () => ({
+  state: (): PlayerStoreState => ({
     isFetchingPlayerData: false,
-    allPlayerData: [] as Player[],
-    playerInjuriesData: [] as InjuredPlayer[],
-    qbProjectionData: [] as ProjectionsPlayer[],
-    wrProjectionData: [] as ProjectionsPlayer[],
-    rbProjectionData: [] as ProjectionsPlayer[],
-    teProjectionData: [] as ProjectionsPlayer[],
-    removedPlayers: [] as Player[],
-    teamPicks: [] as Player[],
+    allPlayerData: [],
+    playerInjuriesData: [],
+    qbProjectionData: [],
+    wrProjectionData: [],
+    rbProjectionData: [],
+    teProjectionData: [],
+    removedPlayers: [],
+    teamPicks: [],
   }),
   actions: {
     async fetchPlayerInjuryData() {
