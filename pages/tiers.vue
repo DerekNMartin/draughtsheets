@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { kmeans } from 'ml-kmeans';
+import { ckmeans } from 'simple-statistics';
 import dayjs from 'dayjs';
 
 const validPositions = ['QB', 'WR', 'RB', 'TE', 'DST', 'K', 'FLX'] as const;
@@ -55,7 +55,7 @@ const rankingQuery = computed(() => {
     limit: positionMapping.value.numOfPlayers,
   };
 });
-const { data: playerRankData } = useFetch('/api/rankings', {
+const { data: playerRankData, status } = useFetch('/api/rankings', {
   query: rankingQuery,
 });
 const players = computed(() => playerRankData?.value?.players);
@@ -65,18 +65,31 @@ const lastUpdatedTime = computed(() => {
 });
 
 const chartData = computed(() => {
-  const data = players.value?.map((player) => [Number(player.rank_ave)]);
-  if (!data?.length) return [];
-  const tiers = kmeans(data, positionMapping.value.numOfTiers, {
-    seed: 111,
-  }).clusters;
-  return players.value?.map((player, index) => {
+  if (!players?.value?.length) return [];
+
+  const rankData = players.value.map((player) => Number(player.rank_ave));
+
+  // Generate the clusters
+  // Returns an array of arrays, e.g., [[1.1, 1.4], [2.5, 3.1, 3.4], ...]
+  const clusters = ckmeans(rankData, positionMapping.value.numOfTiers);
+
+  // Create a lookup Map for matching
+  const rankToTier = new Map<number, number>();
+  clusters.forEach((cluster, tierIndex) => {
+    cluster.forEach((rank) => {
+      rankToTier.set(rank, tierIndex + 1);
+    });
+  });
+
+  return players.value?.map((player) => {
+    const rank = Number(player.rank_ave);
+    const tier = rankToTier.get(rank) || 0;
     return [
       player.player_name,
       player.rank_ecr,
       player.rank_ave,
       player.rank_std,
-      tiers[index],
+      tier,
       player.start_sit_grade,
     ];
   });
@@ -86,7 +99,7 @@ const tierList = computed(() => {
   if (!chartData?.value?.length) return [];
   return chartData.value.reduce<{
     currentTier: number;
-    prevCluster: number | string;
+    prevCluster: number | string | undefined;
     tiers: string[][];
   }>(
     (acc, player) => {
@@ -159,7 +172,10 @@ watch(
         </div>
       </div>
       <div class="flex flex-col border-b border-solid border-neutral-200 pb-6">
-        <p class="text-xs self-end text-gray-500">Last Updated: {{ lastUpdatedTime }}</p>
+        <div class="self-end text-gray-500 text-xs">
+          <p v-if="status === 'pending'">Loading...</p>
+          <p v-else>Last Updated: {{ lastUpdatedTime }}</p>
+        </div>
         <TierChart :data="chartData" />
       </div>
       <div>
